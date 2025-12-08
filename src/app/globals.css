@@ -1,0 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Kosugi+Maru&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'M PLUS Rounded 1c', 'Kosugi Maru', 'Noto Sans JP', sans-serif;
+  }
+}
