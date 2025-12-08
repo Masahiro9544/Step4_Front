@@ -13,6 +13,7 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     loginEmail: (email: string, password: string) => Promise<any>;
+    register: (email: string, password: string) => Promise<any>;
     verifyCode: (sessionId: string, code: string) => Promise<void>;
     loginLine: () => Promise<void>;
     logout: () => void;
@@ -48,6 +49,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return data; // Returns session_id, verification_code (for display)
     };
 
+    const register = async (email: string, password: string) => {
+        const { data } = await api.post('/auth/register', { email, password });
+        return data;
+    };
+
     const verifyCode = async (sessionId: string, code: string) => {
         const { data } = await api.post('/auth/verify-code', {
             session_id: sessionId,
@@ -60,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         Cookies.set('refresh_token', data.refresh_token, { expires: 7 });
 
         setUser(data.user);
-        router.push('/');
+        router.push('/home');
     };
 
     const loginLine = async () => {
@@ -76,11 +82,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         Cookies.remove('access_token');
         Cookies.remove('refresh_token');
         setUser(null);
-        router.push('/login');
+        router.push('/');
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, loginEmail, verifyCode, loginLine, logout }}>
+        <AuthContext.Provider value={{ user, loading, loginEmail, register, verifyCode, loginLine, logout }}>
             {children}
         </AuthContext.Provider>
     );
