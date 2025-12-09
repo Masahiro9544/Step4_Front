@@ -51,9 +51,9 @@ export default function SignupPage() {
                         transition={{ delay: 0.1 }}
                     >
                         <h2 className="text-4xl font-bold text-center mb-2" style={{ color: '#00A0E9' }}>
-                            しんきとうろく
+                            新規会員登録
                         </h2>
-                        <p className="text-center text-gray-600 mb-8">めとれをはじめよう！</p>
+                        <p className="text-center text-gray-600 mb-8">めトレをはじめよう！</p>
                     </motion.div>
 
                     <form className="space-y-5" onSubmit={handleSubmit}>
@@ -106,7 +106,7 @@ export default function SignupPage() {
                             transition={{ delay: 0.4 }}
                         >
                             <label htmlFor="confirm-password" className="block text-sm font-bold mb-2" style={{ color: '#00A0E9' }}>
-                                パスワード（かくにん）
+                                パスワード（確認）
                             </label>
                             <input
                                 id="confirm-password"
@@ -146,7 +146,7 @@ export default function SignupPage() {
                                 }`}
                                 style={{ backgroundColor: '#00A0E9' }}
                             >
-                                {loading ? 'とうろくちゅう...' : 'とうろく'}
+                                {loading ? '登録中...' : '登録'}
                             </button>
                         </motion.div>
                     </form>
@@ -162,7 +162,7 @@ export default function SignupPage() {
                             className="text-sm font-medium transition-colors"
                             style={{ color: '#00A0E9' }}
                         >
-                            すでにアカウントをおもちの方はこちら
+                            すでにアカウントをお持ちの方はこちら
                         </button>
                     </motion.div>
                 </div>
