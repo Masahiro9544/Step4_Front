@@ -1,66 +1,43 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { getExerciseStats } from '@/lib/api';
-import { ExerciseStats } from '@/types/exercise';
-import StatsHeader from '@/components/merelax/StatsHeader';
-import TodayProgress from '@/components/merelax/TodayProgress';
-import ExerciseButton from '@/components/merelax/ExerciseButton';
-import SoundToggle from '@/components/merelax/SoundToggle';
 import AnimatedBackground from '@/components/ui/AnimatedBackground';
-import CharacterGreeting from '@/components/merelax/CharacterGreeting';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
-import { useBGM } from '@/hooks/useBGM';
-import { useSound } from '@/hooks/useSound';
+import CharacterMessage from '@/components/home/CharacterMessage';
+import ResultSummary from '@/components/home/ResultSummary';
+import { getHomeData } from '@/lib/api';
+import { HomeResponse } from '@/types/home';
 
-export default function MerelaxPage() {
+export default function HomePage() {
     const router = useRouter();
-    const [stats, setStats] = useState<ExerciseStats | null>(null);
+    const [homeData, setHomeData] = useState<HomeResponse | null>(null);
     const [loading, setLoading] = useState(true);
-
-    const { speak } = useTextToSpeech();
-    const { playBGM, stopBGM } = useBGM();
-    const { soundEnabled } = useSound();
 
     // TODO: 実際のchild_idはログイン情報から取得
     const childId = 1;
 
     useEffect(() => {
-        fetchStats();
-        // コンポーネントアンマウント時にBGM停止
-        return () => stopBGM();
-    }, [stopBGM]);
+        fetchHomeData();
+    }, []);
 
-    // サウンド有効時にBGM再生
-    useEffect(() => {
-        if (soundEnabled && !loading) {
-            // ユーザーインタラクションなしでの自動再生はブラウザにブロックされる可能性があるため、
-            // 本来は「スタート」ボタン等で開始するのがベストだが、
-            // ここでは簡易的にロード完了後に再生試行する
-            const playPromise = async () => {
-                try {
-                    playBGM();
-                } catch (e) {
-                    console.log("BGM autoplay blocked", e);
-                }
-            };
-            playPromise();
-
-            // 初回のみ挨拶
-            speak("こんにちは！今日も目を大切にしようね");
-        } else {
-            stopBGM();
-        }
-    }, [soundEnabled, loading, playBGM, stopBGM, speak]);
-
-    const fetchStats = async () => {
+    const fetchHomeData = async () => {
         try {
-            const data = await getExerciseStats(childId);
-            setStats(data);
+            const data = await getHomeData(childId);
+            setHomeData(data);
         } catch (error) {
-            console.error('統計情報の取得エラー:', error);
+            console.error('ホームデータの取得エラー:', error);
+            // エラー時はデフォルトデータを設定
+            setHomeData({
+                missions: [
+                    { mission_id: '1', title: 'しりょくチェック', status: 'pending', link: '/eyetest' },
+                    { mission_id: '2', title: 'きょりチェック', status: 'pending', link: '/distancecheck' },
+                    { mission_id: '3', title: 'まばたきゲーム', status: 'pending', link: '/blinkchallenge' },
+                    { mission_id: '4', title: 'めのたいそう', status: 'pending', link: '/merelax' },
+                ],
+                last_results: {},
+                character_message: 'きょうもげんきにがんばろう！'
+            });
         } finally {
             setLoading(false);
         }
@@ -75,143 +52,116 @@ export default function MerelaxPage() {
     }
 
     return (
-        <div className="min-h-screen bg-bg-main pb-20 relative" onClick={() => {
-            // ユーザーアクションをトリガーにBGM開始（ブロック回避）
-            if (soundEnabled) playBGM();
-        }}>
+        <div className="min-h-screen relative flex flex-col pb-24" style={{ backgroundColor: '#F6F9FB' }}>
             <AnimatedBackground />
 
-
-            <div className="relative z-10 w-full max-w-md mx-auto">
-                <header className="p-4 flex justify-between items-center sticky top-0 z-50 bg-white/80 backdrop-blur-sm rounded-b-2xl shadow-sm mb-4">
-                    <div className="flex items-center gap-2">
-                        <CharacterGreeting />
-                        <motion.h1
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-2xl font-bold text-gray-800 drop-shadow-sm"
-                        >
-                            MeRelax
-                        </motion.h1>
-                    </div>
-                    <SoundToggle />
-                </header>
-                {/* 統計情報 - ふわっと出現 */}
-                <motion.div
+            <main className="relative z-10 flex-1 w-full max-w-md mx-auto">
+                {/* ヘッダー */}
+                <motion.header
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
+                    className="p-6 bg-white rounded-b-3xl shadow-md mb-6 relative"
                 >
-                    {stats && <StatsHeader stats={stats} />}
-                </motion.div>
+                    <h1 className="text-4xl font-bold text-center" style={{ color: '#00A0E9' }}>
+                        めとれ
+                    </h1>
+                    <button
+                        onClick={() => router.push('/settings')}
+                        className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        aria-label="設定"
+                    >
+                        <span className="text-2xl text-gray-400">⚙️</span>
+                    </button>
+                </motion.header>
 
-                {/* 今日の達成状況 - 少し遅れて出現 */}
+                {/* キャラクターメッセージ */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
+                    transition={{ delay: 0.1 }}
                 >
-                    {stats && <TodayProgress completed={stats.today_completed} />}
+                    <CharacterMessage message={homeData?.character_message || 'がんばろう！'} />
                 </motion.div>
 
-                {/* 機能ボタン - 順番にポヨンと出現 */}
-                <div className="p-4 space-y-4 mt-4">
-                    <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.3 }}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <ExerciseButton
-                            title="20-20-20ルール"
-                            subtitle="目を守る方法を知ろう"
-                            color="bg-merelax-rule"
-                            onClick={() => {
-                                speak("20-20-20ルールを知ろう！");
-                                router.push('/merelax/rule');
-                            }}
-                        />
-                    </motion.div>
+                {/* クイックアクションボタン */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="w-full px-4 mb-6"
+                >
+                    <h2 className="text-3xl font-bold mb-5 ml-1" style={{ color: '#00A0E9' }}>目のげんきチェック</h2>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            onClick={() => router.push('/distancecheck')}
+                            className="text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all active:scale-95 min-h-[100px]"
+                            style={{ backgroundColor: '#00A0E9' }}
+                        >
+                            <div className="text-4xl mb-2">📏</div>
+                            <div className="text-xl font-bold">きょり</div>
+                        </button>
 
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.4 }}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <ExerciseButton
-                            title="遠くを見よう"
-                            subtitle="空や外を見てみよう"
-                            color="bg-merelax-distance"
-                            completed={stats?.today_completed.includes('distance_view')}
-                            onClick={() => {
-                                speak("遠くを見にいこう！");
-                                router.push('/merelax/distance-view');
-                            }}
-                        />
-                    </motion.div>
+                        <button
+                            onClick={() => router.push('/screentime')}
+                            className="text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all active:scale-95 min-h-[100px]"
+                            style={{ backgroundColor: '#FFD83B', color: '#333' }}
+                        >
+                            <div className="text-4xl mb-2">⏱️</div>
+                            <div className="text-xl font-bold">タイマー</div>
+                        </button>
 
-                    <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.5 }}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <ExerciseButton
-                            title="まばたき"
-                            subtitle="パチパチしよう"
-                            color="bg-merelax-blink"
-                            completed={stats?.today_completed.includes('blink')}
-                            onClick={() => {
-                                speak("パチパチしにいこう！");
-                                router.push('/merelax/blink');
-                            }}
-                        />
-                    </motion.div>
+                        <button
+                            onClick={() => router.push('/eyetest')}
+                            className="text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all active:scale-95 min-h-[100px] col-span-2"
+                            style={{ backgroundColor: '#FF9EC4' }}
+                        >
+                            <div className="text-4xl mb-2">👁️</div>
+                            <div className="text-xl font-bold">しりょく</div>
+                        </button>
+                    </div>
+                </motion.div>
 
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.6 }}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <ExerciseButton
-                            title="目の体操"
-                            subtitle="ぐるぐる動かそう"
-                            color="bg-merelax-tracking"
-                            completed={stats?.today_completed.includes('eye_tracking')}
-                            onClick={() => {
-                                speak("目をぐるぐるしよう！");
-                                router.push('/merelax/eye-tracking');
-                            }}
-                        />
-                    </motion.div>
-
+                {/* 前回の結果 */}
+                {homeData?.last_results && Object.keys(homeData.last_results).length > 0 && (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.7 }}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="mt-6"
+                        transition={{ delay: 0.4 }}
                     >
-                        <button
-                            onClick={() => router.push('/home')}
-                            className="w-full text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all active:scale-95"
-                            style={{ backgroundColor: '#00A0E9' }}
-                        >
-                            <div className="flex items-center justify-center gap-3">
-                                <span className="text-3xl">🏠</span>
-                                <span className="text-xl font-bold">ホームに戻る</span>
-                            </div>
-                        </button>
+                        <ResultSummary results={homeData.last_results} />
                     </motion.div>
+                )}
+            </main>
+
+            {/* 下部ナビゲーションバー */}
+            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-2 z-50" style={{ borderColor: '#00A0E9' }}>
+                <div className="max-w-md mx-auto px-4 py-4 flex justify-around items-center">
+                    <button
+                        onClick={() => router.push('/')}
+                        className="flex flex-col items-center transition-colors min-w-[80px] min-h-[80px] justify-center"
+                        style={{ color: '#00A0E9' }}
+                    >
+                        <span className="text-3xl mb-1">🏠</span>
+                        <span className="text-base font-bold">ホーム</span>
+                    </button>
+                    <button
+                        onClick={() => router.push('/merelax')}
+                        className="flex flex-col items-center text-gray-400 transition-colors min-w-[80px] min-h-[80px] justify-center"
+                        style={{ color: '#999' }}
+                    >
+                        <span className="text-3xl mb-1">💪</span>
+                        <span className="text-base font-bold">たいそう</span>
+                    </button>
+                    <button
+                        onClick={() => router.push('/screentime')}
+                        className="flex flex-col items-center text-gray-400 transition-colors min-w-[80px] min-h-[80px] justify-center"
+                        style={{ color: '#999' }}
+                    >
+                        <span className="text-3xl mb-1">📊</span>
+                        <span className="text-base font-bold">きろく</span>
+                    </button>
                 </div>
-            </div>
+            </nav>
         </div>
     );
 }
