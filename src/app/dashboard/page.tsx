@@ -58,30 +58,32 @@ export default function DashboardPage() {
     // 子供が選択されたらデータを取得
     useEffect(() => {
         if (selectedChild) {
-            fetchVisionData();
-            fetchDistanceData();
-            fetchScreenTimeData();
+            fetchChildDashboardData();
         }
     }, [selectedChild, visionPeriod, screenTimeView]);
 
     const fetchChildren = async () => {
         try {
-            // TODO: 実際のAPIエンドポイントに接続
-            // const res = await fetch(`${API_BASE}/dashboard/children`);
-            // if (res.ok) {
-            //     const data = await res.json();
-            //     setChildren(data.children);
-            //     if (data.children.length > 0) {
-            //         setSelectedChild(data.children[0].child_id);
-            //     }
-            // }
+            // Hardcoded parent_id=1 for demo purposes as requested
+            const parentId = 1;
+            const res = await fetch(`${API_BASE}/dashboard/parent/${parentId}`);
+            if (res.ok) {
+                const data = await res.json();
+                // Map backend response to frontend interface
+                // Backend: DashboardParentResponse -> children_data: [{child: {...}, ...}]
+                const mappedChildren: Child[] = data.children_data.map((item: any) => ({
+                    child_id: item.child.child_id,
+                    child_name: item.child.name,
+                    birth_date: '' // Not currently in backend response but needed for type
+                }));
 
-            // 仮データ
-            const mockChildren: Child[] = [
-                { child_id: 1, child_name: '太郎', birth_date: '2015-04-01' },
-            ];
-            setChildren(mockChildren);
-            setSelectedChild(mockChildren[0].child_id);
+                setChildren(mappedChildren);
+                if (mappedChildren.length > 0) {
+                    setSelectedChild(mappedChildren[0].child_id);
+                }
+            } else {
+                console.error('Failed to fetch children', res.status);
+            }
         } catch (error) {
             console.error('子供データの取得エラー:', error);
         } finally {
@@ -89,59 +91,90 @@ export default function DashboardPage() {
         }
     };
 
-    const fetchVisionData = async () => {
-        try {
-            // TODO: 実際のAPIエンドポイントに接続
-            // const res = await fetch(`${API_BASE}/dashboard/vision-trend?child_id=${selectedChild}&period=${visionPeriod}`);
-            // if (res.ok) {
-            //     const data = await res.json();
-            //     setVisionData(data.data);
-            // }
+    // Integrated fetch function to get all dashboard data for selected child
+    const fetchChildDashboardData = async () => {
+        if (!selectedChild) return;
 
-            // 仮データ
-            setVisionData([]);
+        try {
+            const res = await fetch(`${API_BASE}/dashboard/child/${selectedChild}`);
+            if (res.ok) {
+                const data = await res.json();
+
+                // 1. Vision Data (EyeTest)
+                if (data.recent_eye_tests && data.recent_eye_tests.length > 0) {
+                    // Transform backend EyeTest to frontend VisionData
+                    // Backend: { check_date: string, left_eye: string, right_eye: string, test_distance_cm: int }
+                    const mappedVisionData: VisionData[] = data.recent_eye_tests.map((test: any) => ({
+                        test_date: test.check_date,
+                        right_30cm: null, // Specific mapping might be needed if recorded differently
+                        left_30cm: null,
+                        right_3m: parseFloat(test.right_eye) || null, // Assuming standard distance recording
+                        left_3m: parseFloat(test.left_eye) || null
+                    }));
+                    setVisionData(mappedVisionData);
+                } else {
+                    setVisionData([]);
+                }
+
+                // 2. Distance Data (DistanceCheck)
+                if (data.recent_distance_checks && data.recent_distance_checks.length > 0) {
+                    const latest = data.recent_distance_checks[0];
+                    setDistanceData({
+                        distance_cm: latest.avg_distance_cm,
+                        check_date: latest.check_date,
+                        status: latest.avg_distance_cm < 30 ? 'too_close' : 'appropriate' // Simple logic
+                    });
+                } else {
+                    setDistanceData({
+                        distance_cm: 0,
+                        check_date: new Date().toISOString(),
+                        status: 'no_data'
+                    });
+                }
+
+                // 3. Screen Time
+                if (data.recent_screentime && data.recent_screentime.length > 0) {
+                    // Map backend ScreenTime to frontend structure
+                    // Backend: { start_time: datetime, total_minutes: int }
+                    const mappedScreenTime: ScreenTimeDataPoint[] = data.recent_screentime.map((st: any) => {
+                        const mins = st.total_minutes || 0;
+                        let status: 'appropriate' | 'moderate' | 'too_long' = 'appropriate';
+                        if (mins > 120) status = 'too_long';
+                        else if (mins > 60) status = 'moderate';
+
+                        return {
+                            date: st.start_time,
+                            total_minutes: mins,
+                            status: status
+                        };
+                    });
+
+                    setScreenTimeData({
+                        view: screenTimeView,
+                        data: mappedScreenTime
+                    });
+                } else {
+                    setScreenTimeData({
+                        view: screenTimeView,
+                        data: []
+                    });
+                }
+            }
         } catch (error) {
-            console.error('視力データの取得エラー:', error);
+            console.error('ダッシュボードデータの取得エラー:', error);
         }
+    };
+
+    const fetchVisionData = async () => {
+        // Consolidated into fetchChildDashboardData
     };
 
     const fetchDistanceData = async () => {
-        try {
-            // TODO: 実際のAPIエンドポイントに接続
-            // const res = await fetch(`${API_BASE}/dashboard/latest-distance?child_id=${selectedChild}`);
-            // if (res.ok) {
-            //     const data = await res.json();
-            //     setDistanceData(data);
-            // }
-
-            // 仮データ
-            setDistanceData({
-                distance_cm: 0,
-                check_date: new Date().toISOString(),
-                status: 'no_data'
-            });
-        } catch (error) {
-            console.error('距離データの取得エラー:', error);
-        }
+        // Consolidated into fetchChildDashboardData
     };
 
     const fetchScreenTimeData = async () => {
-        try {
-            // TODO: 実際のAPIエンドポイントに接続
-            // const res = await fetch(`${API_BASE}/dashboard/screen-time?child_id=${selectedChild}&view=${screenTimeView}`);
-            // if (res.ok) {
-            //     const data = await res.json();
-            //     setScreenTimeData(data);
-            // }
-
-            // 仮データ
-            setScreenTimeData({
-                view: screenTimeView,
-                data: []
-            });
-        } catch (error) {
-            console.error('スクリーンタイムデータの取得エラー:', error);
-        }
+        // Consolidated into fetchChildDashboardData
     };
 
     const getDistanceStatusColor = (status: string) => {
@@ -206,11 +239,10 @@ export default function DashboardPage() {
                                 <button
                                     key={child.child_id}
                                     onClick={() => setSelectedChild(child.child_id)}
-                                    className={`px-6 py-3 rounded-xl font-bold transition-all ${
-                                        selectedChild === child.child_id
-                                            ? 'text-white shadow-lg'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
+                                    className={`px-6 py-3 rounded-xl font-bold transition-all ${selectedChild === child.child_id
+                                        ? 'text-white shadow-lg'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
                                     style={selectedChild === child.child_id ? { backgroundColor: '#00A0E9' } : {}}
                                 >
                                     {child.child_name}
@@ -232,22 +264,20 @@ export default function DashboardPage() {
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setVisionPeriod('3months')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${
-                                    visionPeriod === '3months'
-                                        ? 'text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all ${visionPeriod === '3months'
+                                    ? 'text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
                                 style={visionPeriod === '3months' ? { backgroundColor: '#00A0E9' } : {}}
                             >
                                 3ヶ月
                             </button>
                             <button
                                 onClick={() => setVisionPeriod('1year')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${
-                                    visionPeriod === '1year'
-                                        ? 'text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all ${visionPeriod === '1year'
+                                    ? 'text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
                                 style={visionPeriod === '1year' ? { backgroundColor: '#00A0E9' } : {}}
                             >
                                 1年
@@ -312,22 +342,20 @@ export default function DashboardPage() {
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setScreenTimeView('daily')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${
-                                    screenTimeView === 'daily'
-                                        ? 'text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all ${screenTimeView === 'daily'
+                                    ? 'text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
                                 style={screenTimeView === 'daily' ? { backgroundColor: '#00A0E9' } : {}}
                             >
                                 日別
                             </button>
                             <button
                                 onClick={() => setScreenTimeView('weekly')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${
-                                    screenTimeView === 'weekly'
-                                        ? 'text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all ${screenTimeView === 'weekly'
+                                    ? 'text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
                                 style={screenTimeView === 'weekly' ? { backgroundColor: '#00A0E9' } : {}}
                             >
                                 週別
