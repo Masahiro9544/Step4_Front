@@ -163,13 +163,46 @@ export default function ScreenTimePage() {
         isPausedRef.current = true;
     };
 
-    const handleReset = () => {
+    const handleReset = async () => {
         // タイマーをリセット
-        clearTimers();
-        setIsPaused(false);
-        isPausedRef.current = false;
-        setStartTime(null);
-        setStatus(prev => prev ? { ...prev, elapsed_seconds: 0, is_active: false, alert_level: 0 } : null);
+        setLoading(true);
+        try {
+            // サーバー側のアクティブセッションを終了
+            const res = await fetch(`${API_BASE}/screentime/end`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ child_id: childId })
+            });
+
+            // サーバー側の終了処理が成功してもしなくても、ローカルはリセット
+            clearTimers();
+            setIsPaused(false);
+            isPausedRef.current = false;
+            setStartTime(null);
+            setStatus({
+                screentime_id: 0,
+                is_active: false,
+                elapsed_seconds: 0,
+                message: '計測していないよ',
+                alert_level: 0
+            });
+        } catch (e) {
+            console.error(e);
+            // エラーが発生してもローカルはリセット
+            clearTimers();
+            setIsPaused(false);
+            isPausedRef.current = false;
+            setStartTime(null);
+            setStatus({
+                screentime_id: 0,
+                is_active: false,
+                elapsed_seconds: 0,
+                message: '計測していないよ',
+                alert_level: 0
+            });
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleRecord = async () => {
