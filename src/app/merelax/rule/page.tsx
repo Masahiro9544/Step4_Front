@@ -188,6 +188,7 @@ export default function RulePage() {
                                     src={SLIDES[currentSlideIndex].image}
                                     alt="Rule Illustration"
                                     fill
+                                    unoptimized
                                     className="object-contain"
                                 />
                             </div>

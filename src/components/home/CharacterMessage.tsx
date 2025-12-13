@@ -31,6 +31,7 @@ export default function CharacterMessage({ message }: CharacterMessageProps) {
                     src="/images/character/character_normal.png"
                     alt="犬のキャラクター"
                     fill
+                    unoptimized
                     className="object-contain drop-shadow-xl"
                 />
             </motion.div>
