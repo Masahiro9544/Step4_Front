@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { ExerciseStats } from '@/types/exercise';
 
 interface StatsHeaderProps {

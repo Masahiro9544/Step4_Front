@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from 'react';
 import { ChildCreate, ChildUpdate, Child } from '@/types/settings';
 
