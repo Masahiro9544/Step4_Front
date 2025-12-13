@@ -111,7 +111,7 @@ export default function HomePage() {
                         </button>
 
                         <button
-                            onClick={() => router.push('/eyetest')}
+                            onClick={() => router.push('/vision-home')}
                             className="text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all active:scale-95 min-h-[100px] col-span-2"
                             style={{ backgroundColor: '#FF9EC4' }}
                         >

@@ -96,6 +96,7 @@ export default function MerelaxPage() {
                                 alt="MeRelax Logo"
                                 width={280}
                                 height={100}
+                                unoptimized
                                 className="object-contain"
                             />
                         </motion.div>

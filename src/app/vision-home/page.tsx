@@ -50,6 +50,7 @@ export default function Home() {
             alt="Character"
             width={300}
             height={300}
+            unoptimized
             className="shadow-lg border-4 border-white rounded-3xl"
           />
         </div>
