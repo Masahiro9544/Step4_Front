@@ -1,11 +1,14 @@
 'use client';
 
 import { AuthProvider } from '../context/AuthContext';
+import { SoundProvider } from '../context/SoundContext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <AuthProvider>
-            {children}
+            <SoundProvider>
+                {children}
+            </SoundProvider>
         </AuthProvider>
     );
 }
