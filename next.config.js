@@ -12,10 +12,6 @@ const nextConfig = {
     unoptimized: true,
     remotePatterns: [],
   },
-  // standaloneモードでpublicフォルダを正しくコピー
-  experimental: {
-    outputFileTracingRoot: undefined,
-  },
 }
 
 module.exports = nextConfig
