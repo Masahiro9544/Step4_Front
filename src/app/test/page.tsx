@@ -307,6 +307,7 @@ function TestContent() {
                         alt="Guide Character"
                         width={150}
                         height={150}
+                        unoptimized
                         className="rounded-3xl border-4 border-white shadow-md mx-auto"
                         style={{ objectFit: 'cover' }}
                     />

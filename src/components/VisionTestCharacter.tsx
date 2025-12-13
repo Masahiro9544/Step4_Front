@@ -13,6 +13,7 @@ export default function VisionTestCharacter({ coveredEye }: Props) {
                 src="/images/character/character_normal.png"
                 alt="Navi Character"
                 fill
+                unoptimized
                 className="object-contain"
                 priority
             />
