@@ -302,14 +302,10 @@ function TestContent() {
 
                 {/* Character Guide - Compact area */}
                 <div className="mt-4 shrink-0 z-10 text-center">
-                    <Image
+                    <img
                         src="/images/character/shiryokucheck.jpeg"
                         alt="Guide Character"
-                        width={150}
-                        height={150}
-                        unoptimized
-                        className="rounded-3xl border-4 border-white shadow-md mx-auto"
-                        style={{ objectFit: 'cover' }}
+                        className="rounded-3xl border-4 border-white shadow-md mx-auto w-[150px] h-[150px] object-cover"
                     />
                 </div>
             </div>
