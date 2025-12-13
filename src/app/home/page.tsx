@@ -150,7 +150,7 @@ export default function HomePage() {
                         style={{ color: '#999' }}
                     >
                         <span className="text-3xl mb-1">💪</span>
-                        <span className="text-base font-bold">たいそう</span>
+                        <span className="text-base font-bold">めラックス</span>
                     </button>
                     <button
                         onClick={() => router.push('/dashboard')}
