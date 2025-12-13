@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { useCallback } from 'react';
 
 export const useSound = () => {

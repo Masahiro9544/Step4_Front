@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { useState, useCallback } from 'react';
 
 export type Direction = 'up' | 'down' | 'left' | 'right';

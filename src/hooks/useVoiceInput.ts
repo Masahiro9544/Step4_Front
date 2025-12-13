@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Direction } from './useVisionTest';
 
