@@ -7,8 +7,8 @@ import { motion } from 'framer-motion';
 import AnimatedBackground from '@/components/ui/AnimatedBackground';
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('demo@example.com');
+    const [password, setPassword] = useState('demo123');
     const { loginEmail, loginLine } = useAuth();
     const router = useRouter();
     const [error, setError] = useState('');
