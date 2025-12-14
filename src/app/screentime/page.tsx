@@ -167,6 +167,7 @@ export default function ScreenTimePage() {
             } : null);
             // 停止時の経過時間から再開
             startLocalTimer(pausedElapsedSeconds);
+            startSyncTimer(childId);
             return;
         }
 
@@ -185,6 +186,7 @@ export default function ScreenTimePage() {
                 isPausedRef.current = false;
                 setPausedElapsedSeconds(0);
                 startLocalTimer(0);
+                startSyncTimer(childId);
             }
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
