@@ -9,6 +9,7 @@ import CharacterMessage from '@/components/home/CharacterMessage';
 import ResultSummary from '@/components/home/ResultSummary';
 import { getHomeData } from '@/lib/api';
 import { HomeResponse } from '@/types/home';
+import { useSound } from '@/hooks/useRfpSound';
 
 const AnimatedBackground = dynamic(() => import('@/components/ui/AnimatedBackground'), {
     ssr: false,
@@ -19,13 +20,18 @@ export default function HomePage() {
     const [homeData, setHomeData] = useState<HomeResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [clickedButton, setClickedButton] = useState<string | null>(null);
+    const { playSound } = useSound();
 
     // TODO: 実際のchild_idはログイン情報から取得
     const childId = 1;
 
     useEffect(() => {
+        // Play welcome audio on home mount
+        console.log('Playing home welcome audio');
+        playSound('mememestarrt.wav');
+
         fetchHomeData();
-    }, []);
+    }, [playSound]);
 
     const fetchHomeData = async () => {
         try {
@@ -59,20 +65,20 @@ export default function HomePage() {
 
     return (
         <div className="min-h-screen relative flex flex-col pb-24"
-             style={{
-                 background: 'linear-gradient(135deg, #E3F2FD 0%, #FFF3E0 50%, #FFF9C4 100%)',
-             }}>
+            style={{
+                background: 'linear-gradient(135deg, #E3F2FD 0%, #FFF3E0 50%, #FFF9C4 100%)',
+            }}>
             {/* かわいい水玉と星のオーバーレイ */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 {/* 水玉パターン */}
                 <div className="absolute inset-0 opacity-15"
-                     style={{
-                         backgroundImage: `radial-gradient(circle, #FF9EC4 12%, transparent 12%),
+                    style={{
+                        backgroundImage: `radial-gradient(circle, #FF9EC4 12%, transparent 12%),
                                           radial-gradient(circle, #00A0E9 12%, transparent 12%),
                                           radial-gradient(circle, #FFD83B 12%, transparent 12%)`,
-                         backgroundSize: '100px 100px, 140px 140px, 120px 120px',
-                         backgroundPosition: '0 0, 50px 50px, 100px 25px'
-                     }}>
+                        backgroundSize: '100px 100px, 140px 140px, 120px 120px',
+                        backgroundPosition: '0 0, 50px 50px, 100px 25px'
+                    }}>
                 </div>
                 {/* キラキラ星 */}
                 <div className="absolute top-20 left-10 text-4xl opacity-30">✨</div>
@@ -232,11 +238,11 @@ export default function HomePage() {
 
             {/* 下部ナビゲーションバー - かわいく改良 */}
             <nav className="fixed bottom-0 left-0 right-0 z-50"
-                 style={{
-                     background: 'linear-gradient(180deg, #FFFFFF 0%, #E3F2FD 100%)',
-                     borderTop: '4px solid #00A0E9',
-                     boxShadow: '0 -4px 20px rgba(0, 160, 233, 0.15)'
-                 }}>
+                style={{
+                    background: 'linear-gradient(180deg, #FFFFFF 0%, #E3F2FD 100%)',
+                    borderTop: '4px solid #00A0E9',
+                    boxShadow: '0 -4px 20px rgba(0, 160, 233, 0.15)'
+                }}>
                 <div className="max-w-md mx-auto px-4 py-3 flex justify-around items-center">
                     <motion.button
                         whileHover={{ scale: 1.05, y: -2 }}
