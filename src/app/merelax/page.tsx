@@ -4,18 +4,22 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { getExerciseStats } from '@/lib/api';
 import { ExerciseStats } from '@/types/exercise';
 import StatsHeader from '@/components/merelax/StatsHeader';
 import TodayProgress from '@/components/merelax/TodayProgress';
 import ExerciseButton from '@/components/merelax/ExerciseButton';
 import SoundToggle from '@/components/merelax/SoundToggle';
-import AnimatedBackground from '@/components/ui/AnimatedBackground';
 import CharacterGreeting from '@/components/merelax/CharacterGreeting';
 import Footer from '@/components/Footer';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useBGM } from '@/hooks/useBGM';
 import { useSound } from '@/hooks/useSound';
+
+const AnimatedBackground = dynamic(() => import('@/components/ui/AnimatedBackground'), {
+    ssr: false,
+});
 
 export default function MerelaxPage() {
     const router = useRouter();

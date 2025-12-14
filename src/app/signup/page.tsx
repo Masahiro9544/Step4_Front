@@ -4,7 +4,11 @@ import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import AnimatedBackground from '@/components/ui/AnimatedBackground';
+import dynamic from 'next/dynamic';
+
+const AnimatedBackground = dynamic(() => import('@/components/ui/AnimatedBackground'), {
+    ssr: false,
+});
 
 export default function SignupPage() {
     const [email, setEmail] = useState('');
