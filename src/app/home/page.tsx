@@ -3,10 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import AnimatedBackground from '@/components/ui/AnimatedBackground';
 import CharacterMessage from '@/components/home/CharacterMessage';
 import ResultSummary from '@/components/home/ResultSummary';
-import Footer from '@/components/Footer';
 import { getHomeData } from '@/lib/api';
 import { HomeResponse } from '@/types/home';
 
@@ -53,8 +51,20 @@ export default function HomePage() {
     }
 
     return (
-        <div className="min-h-screen relative flex flex-col pb-24" style={{ backgroundColor: '#F6F9FB' }}>
-            <AnimatedBackground />
+        <div className="min-h-screen relative flex flex-col pb-24"
+             style={{
+                 background: 'linear-gradient(135deg, #E3F2FD 0%, #FFF9C4 100%)',
+             }}>
+            {/* 水玉のオーバーレイ */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none"
+                 style={{
+                     backgroundImage: `radial-gradient(circle, #FF9EC4 10%, transparent 10%),
+                                      radial-gradient(circle, #00A0E9 10%, transparent 10%),
+                                      radial-gradient(circle, #FFD83B 10%, transparent 10%)`,
+                     backgroundSize: '80px 80px, 120px 120px, 100px 100px',
+                     backgroundPosition: '0 0, 40px 40px, 80px 20px'
+                 }}>
+            </div>
 
             <main className="relative z-10 flex-1 w-full max-w-md mx-auto">
                 {/* ヘッダー */}
@@ -132,8 +142,37 @@ export default function HomePage() {
                         <ResultSummary results={homeData.last_results} />
                     </motion.div>
                 )}
-                <Footer activeTab="home" />
             </main>
+
+            {/* 下部ナビゲーションバー */}
+            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-2 z-50" style={{ borderColor: '#00A0E9' }}>
+                <div className="max-w-md mx-auto px-4 py-4 flex justify-around items-center">
+                    <button
+                        onClick={() => router.push('/home')}
+                        className="flex flex-col items-center transition-colors min-w-[80px] min-h-[80px] justify-center"
+                        style={{ color: '#00A0E9' }}
+                    >
+                        <span className="text-3xl mb-1">🏠</span>
+                        <span className="text-base font-bold">ホーム</span>
+                    </button>
+                    <button
+                        onClick={() => router.push('/merelax')}
+                        className="flex flex-col items-center text-gray-400 transition-colors min-w-[80px] min-h-[80px] justify-center"
+                        style={{ color: '#999' }}
+                    >
+                        <span className="text-3xl mb-1">💪</span>
+                        <span className="text-base font-bold">めラックス</span>
+                    </button>
+                    <button
+                        onClick={() => router.push('/dashboard')}
+                        className="flex flex-col items-center text-gray-400 transition-colors min-w-[80px] min-h-[80px] justify-center"
+                        style={{ color: '#999' }}
+                    >
+                        <span className="text-3xl mb-1">📊</span>
+                        <span className="text-base font-bold">きろく</span>
+                    </button>
+                </div>
+            </nav>
         </div>
     );
 }
