@@ -133,19 +133,31 @@ export default function DashboardPage() {
                     });
                 }
 
-                // 3. Screen Time
+                // 3. Screen Time - Aggregate by date
                 if (data.recent_screentime && data.recent_screentime.length > 0) {
-                    // Map backend ScreenTime to frontend structure
-                    // Backend: { start_time: datetime, total_minutes: int }
-                    const mappedScreenTime: ScreenTimeDataPoint[] = data.recent_screentime.map((st: any) => {
+                    // Group by date and sum total_minutes
+                    const dailyTotals: { [key: string]: number } = {};
+
+                    data.recent_screentime.forEach((st: any) => {
+                        const dateKey = new Date(st.start_time).toISOString().split('T')[0]; // YYYY-MM-DD
                         const mins = st.total_minutes || 0;
+
+                        if (dailyTotals[dateKey]) {
+                            dailyTotals[dateKey] += mins;
+                        } else {
+                            dailyTotals[dateKey] = mins;
+                        }
+                    });
+
+                    // Convert to array with status
+                    const mappedScreenTime: ScreenTimeDataPoint[] = Object.entries(dailyTotals).map(([dateKey, totalMins]) => {
                         let status: 'appropriate' | 'moderate' | 'too_long' = 'appropriate';
-                        if (mins > 120) status = 'too_long';
-                        else if (mins > 60) status = 'moderate';
+                        if (totalMins > 120) status = 'too_long';
+                        else if (totalMins > 60) status = 'moderate';
 
                         return {
-                            date: st.start_time,
-                            total_minutes: mins,
+                            date: dateKey,
+                            total_minutes: totalMins,
                             status: status
                         };
                     });
