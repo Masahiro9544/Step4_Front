@@ -48,7 +48,7 @@ export default function DashboardPage() {
     const [screenTimeView, setScreenTimeView] = useState<'daily' | 'weekly'>('daily');
     const [loading, setLoading] = useState(true);
 
-    const API_BASE = 'http://localhost:8000/api/v1';
+    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/v1`;
 
     // 初期データ読み込み
     useEffect(() => {
