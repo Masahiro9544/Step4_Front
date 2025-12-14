@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 import { useCallback, useEffect, useState, useRef } from 'react';
 
 export const useVoiceGuidance = () => {

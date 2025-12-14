@@ -17,9 +17,8 @@ export default function ScreenTimePage() {
     const [startTime, setStartTime] = useState<number | null>(null); // 開始時刻（タイムスタンプ）
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const syncRef = useRef<NodeJS.Timeout | null>(null);
-    const isPausedRef = useRef(false); // isPausedの最新値を保持
 
-    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000'}/api/v1`;
+    const API_BASE = 'http://localhost:8000/api';
 
     // 1. Initialize: Get Child ID & Status
     useEffect(() => {
@@ -96,10 +95,8 @@ export default function ScreenTimePage() {
         setStatus(prev => prev ? { ...prev, elapsed_seconds: initialSeconds } : null);
 
         timerRef.current = setInterval(() => {
-            if (isPausedRef.current) return; // 一時停止中はスキップ
-
             setStatus(prev => {
-                if (!prev) return prev;
+                if (!prev || !prev.is_active) return prev;
 
                 // タイムスタンプベースで経過時間を計算（より正確）
                 const currentTime = Date.now();
@@ -111,7 +108,7 @@ export default function ScreenTimePage() {
                 if (newSeconds > 1800) level = 2; // 30m
                 else if (newSeconds > 600) level = 1; // 10m
 
-                return { ...prev, elapsed_seconds: newSeconds, alert_level: level, is_active: true };
+                return { ...prev, elapsed_seconds: newSeconds, alert_level: level };
             });
         }, 1000);
     };
@@ -128,7 +125,6 @@ export default function ScreenTimePage() {
         if (isPaused) {
             // 一時停止から再開
             setIsPaused(false);
-            isPausedRef.current = false;
             setStatus(prev => prev ? { ...prev, is_active: true } : null);
             if (status) {
                 startLocalTimer(status.elapsed_seconds);
@@ -149,7 +145,6 @@ export default function ScreenTimePage() {
                 const data = await res.json();
                 setStatus(data);
                 setIsPaused(false);
-                isPausedRef.current = false;
                 startLocalTimer(0);
                 startSyncTimer(childId);
             }
@@ -159,15 +154,16 @@ export default function ScreenTimePage() {
 
     const handlePause = () => {
         // タイマーを一時停止
+        clearTimers();
         setIsPaused(true);
-        isPausedRef.current = true;
+        setStartTime(null);
+        setStatus(prev => prev ? { ...prev, is_active: false } : null);
     };
 
     const handleReset = () => {
         // タイマーをリセット
         clearTimers();
         setIsPaused(false);
-        isPausedRef.current = false;
         setStartTime(null);
         setStatus(prev => prev ? { ...prev, elapsed_seconds: 0, is_active: false, alert_level: 0 } : null);
     };
@@ -184,7 +180,6 @@ export default function ScreenTimePage() {
             if (res.ok) {
                 clearTimers();
                 setIsPaused(false);
-                isPausedRef.current = false;
                 setStartTime(null);
                 // 成功メッセージを表示（将来的にはモーダルなど）
                 alert('きろくしました！');

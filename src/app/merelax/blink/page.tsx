@@ -40,13 +40,13 @@ export default function BlinkPage() {
             innerTimer = setTimeout(() => {
                 playSound('/sounds/mehiraku.wav');
                 setCharacterBlinking(false);
-            }, 5000); // 5秒間目を閉じる
+            }, 800); // 0.8秒間目を閉じる
         };
 
         // 初回 (イントロ待機後に開始)
-        const timer1 = setTimeout(loop, 4000);
-        // ループ (10秒ごと)
-        const interval = setInterval(loop, 10000);
+        const timer1 = setTimeout(loop, 2000);
+        // ループ (2秒ごと)
+        const interval = setInterval(loop, 2000);
 
         return () => {
             clearTimeout(finishTimer);
@@ -170,7 +170,7 @@ export default function BlinkPage() {
                         <motion.div
                             className="bg-merelax-blink h-2.5 rounded-full"
                             animate={{ width: ["0%", "100%", "0%"] }}
-                            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                         />
                     </div>
                     <p className="text-sm text-gray-400">バーに あわせて やってみよう</p>

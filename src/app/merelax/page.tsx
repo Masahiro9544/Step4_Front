@@ -12,6 +12,7 @@ import ExerciseButton from '@/components/merelax/ExerciseButton';
 import SoundToggle from '@/components/merelax/SoundToggle';
 import AnimatedBackground from '@/components/ui/AnimatedBackground';
 import CharacterGreeting from '@/components/merelax/CharacterGreeting';
+import Footer from '@/components/Footer';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useBGM } from '@/hooks/useBGM';
 import { useSound } from '@/hooks/useSound';
@@ -76,7 +77,7 @@ export default function MerelaxPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#E0F2F7] pb-20 relative font-sans text-[#0093D0]" onClick={() => {
+        <div className="min-h-screen bg-[#E0F2F7] pb-32 relative font-sans text-[#0093D0]" onClick={() => {
             // ユーザーアクションをトリガーにBGM開始（ブロック回避）
             if (soundEnabled) playBGM();
         }}>
@@ -96,7 +97,6 @@ export default function MerelaxPage() {
                                 alt="MeRelax Logo"
                                 width={280}
                                 height={100}
-                                unoptimized
                                 className="object-contain"
                             />
                         </motion.div>
@@ -206,8 +206,9 @@ export default function MerelaxPage() {
                     </div>
                 </div>
             </div>
-            {/* Sound Toggle (Fixed Position) */}
-            <SoundToggle className="fixed bottom-4 right-4 z-50" />
+            {/* Sound Toggle (Fixed Position, moved up for Footer) */}
+            <SoundToggle className="fixed bottom-32 right-4 z-50" />
+            <Footer activeTab="merelax" />
         </div>
     );
 }

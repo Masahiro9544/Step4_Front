@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
     // We need to be careful. '/' should be exact match or use logic below.
 
     // Better logic for publicPaths check:
-    const isPublic = path === '/' || path === '/signup' || path.startsWith('/verify') || path.startsWith('/auth/callback') || path.startsWith('/_next') || path.startsWith('/favicon.ico') || path.startsWith('/api') || path.startsWith('/images');
+    const isPublic = path === '/' || path === '/signup' || path.startsWith('/verify') || path.startsWith('/auth/callback') || path.startsWith('/_next') || path.startsWith('/favicon.ico') || path.startsWith('/api');
 
     if (!token && !isPublic) {
         // If not authenticated and trying to access a protected route (e.g. /home), redirect to login (/)

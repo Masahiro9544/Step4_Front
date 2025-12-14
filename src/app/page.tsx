@@ -7,8 +7,8 @@ import { motion } from 'framer-motion';
 import AnimatedBackground from '@/components/ui/AnimatedBackground';
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('demo@example.com');
-    const [password, setPassword] = useState('demo123');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const { loginEmail, loginLine } = useAuth();
     const router = useRouter();
     const [error, setError] = useState('');
@@ -25,9 +25,6 @@ export default function LoginPage() {
             // In a real app, we might not pass code in URL, but for demo:
             const verifyUrl = `/verify?session_id=${data.session_id}&code=${data.verification_code}`;
             console.log('Navigating to:', verifyUrl);
-
-            // Prefetch the verify page for faster navigation
-            router.prefetch(verifyUrl);
             router.push(verifyUrl);
         } catch (err: any) {
             console.error('Login error:', err);

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import SoundToggle from '@/components/merelax/SoundToggle';
-import { useSound } from '@/hooks/useSound';
+
 
 // Components
 const MenuButton = ({ title, subtitle, color, onClick, emoji }: { title: string, subtitle: string, color: string, onClick: () => void, emoji: string }) => (
@@ -28,7 +28,7 @@ const MenuButton = ({ title, subtitle, color, onClick, emoji }: { title: string,
 
 export default function EyeTrackingMenuPage() {
     const router = useRouter();
-    const { playSound } = useSound();
+
 
     return (
         <div className="min-h-screen bg-[#0D1117] relative flex flex-col p-4">
@@ -51,7 +51,7 @@ export default function EyeTrackingMenuPage() {
                         color="bg-[#F5A623] text-white"
                         emoji="🚀"
                         onClick={() => {
-                            playSound('/sounds/menotaiso.wav'); // Intro sound
+
                             router.push('/merelax/eye-tracking/rocket');
                         }}
                     />
@@ -63,7 +63,7 @@ export default function EyeTrackingMenuPage() {
                         color="bg-[#2ECC71] text-white"
                         emoji="👀"
                         onClick={() => {
-                            playSound('/sounds/menotaiso.wav'); // Intro sound
+
                             router.push('/merelax/eye-tracking/jump');
                         }}
                     />

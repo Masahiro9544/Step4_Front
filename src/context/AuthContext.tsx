@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import api from '../utils/axios';
@@ -68,9 +66,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         Cookies.set('refresh_token', data.refresh_token, { expires: 7 });
 
         setUser(data.user);
-
-        // Prefetch the home page for faster navigation
-        router.prefetch('/home');
         router.push('/home');
     };
 

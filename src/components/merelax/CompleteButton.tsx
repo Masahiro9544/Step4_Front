@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 interface CompleteButtonProps {
     onClick: () => void;
     disabled?: boolean;
