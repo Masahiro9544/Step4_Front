@@ -260,12 +260,12 @@ export default function HomePage() {
                         style={{ color: '#999' }}
                     >
                         <span className="text-3xl mb-1">💪</span>
-                        <span className="text-sm font-bold">めラックス</span>
+                        <span className="text-sm font-bold">めリラ</span>
                     </motion.button>
                     <motion.button
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => router.push('/record')}
                         className="flex flex-col items-center transition-all min-w-[85px] min-h-[75px] justify-center rounded-2xl p-2"
                         style={{ color: '#999' }}
                     >

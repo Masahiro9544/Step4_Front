@@ -28,7 +28,7 @@ export default function Footer({ activeTab }: FooterProps) {
                     <span className={`text-base font-bold ${activeTab === 'merelax' ? '' : 'text-gray-400'}`}>たいそう</span>
                 </button>
                 <button
-                    onClick={() => router.push('/dashboard')}
+                    onClick={() => router.push('/record')}
                     className="flex flex-col items-center transition-colors min-w-[80px] min-h-[80px] justify-center"
                     style={{ color: activeTab === 'record' ? '#00A0E9' : '#999' }}
                 >
