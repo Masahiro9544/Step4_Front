@@ -15,8 +15,10 @@ export default function ScreenTimePage() {
     const [loading, setLoading] = useState(true);
     const [isPaused, setIsPaused] = useState(false); // 一時停止状態
     const [startTime, setStartTime] = useState<number | null>(null); // 開始時刻（タイムスタンプ）
+    const [pausedElapsedSeconds, setPausedElapsedSeconds] = useState<number>(0); // 停止時の経過秒数
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const syncRef = useRef<NodeJS.Timeout | null>(null);
+    const isPausedRef = useRef(false); // isPausedの最新値を保持
 
     const API_BASE = 'http://localhost:8000/api';
 
@@ -61,19 +63,35 @@ export default function ScreenTimePage() {
     }, [status?.is_active, isPaused, childId]);
 
     const clearTimers = () => {
-        if (timerRef.current) clearInterval(timerRef.current);
-        if (syncRef.current) clearInterval(syncRef.current);
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
+        if (syncRef.current) {
+            clearInterval(syncRef.current);
+            syncRef.current = null;
+        }
     };
 
     const fetchStatus = async (cId: number) => {
+        if (isPausedRef.current) {
+            return;
+        }
+
         try {
             const res = await fetch(`${API_BASE}/screentime/status?child_id=${cId}`);
             if (res.ok) {
                 const data: ScreenTimeStatus = await res.json();
+
+                // fetch完了後にも再度チェックする（停止中なら無視する）
+                if (isPausedRef.current) {
+                    return;
+                }
+
                 setStatus(data);
 
                 // Handle Timer Logic
-                if (data.is_active) {
+                if (data.is_active && !isPausedRef.current) {
                     startLocalTimer(data.elapsed_seconds);
                     startSyncTimer(cId);
                 } else {
@@ -84,6 +102,10 @@ export default function ScreenTimePage() {
     };
 
     const startLocalTimer = (initialSeconds: number) => {
+        if (isPausedRef.current) {
+            return;
+        }
+
         if (timerRef.current) clearInterval(timerRef.current);
 
         // タイムスタンプベースの開始時刻を記録
@@ -95,6 +117,8 @@ export default function ScreenTimePage() {
         setStatus(prev => prev ? { ...prev, elapsed_seconds: initialSeconds } : null);
 
         timerRef.current = setInterval(() => {
+            if (isPausedRef.current) return;
+
             setStatus(prev => {
                 if (!prev || !prev.is_active) return prev;
 
@@ -114,9 +138,14 @@ export default function ScreenTimePage() {
     };
 
     const startSyncTimer = (cId: number) => {
+        if (isPausedRef.current) {
+            return;
+        }
+
         if (syncRef.current) clearInterval(syncRef.current);
         // Sync every 10 seconds
         syncRef.current = setInterval(() => {
+            if (isPausedRef.current) return;
             fetchStatus(cId);
         }, 10000);
     };
@@ -125,11 +154,11 @@ export default function ScreenTimePage() {
         if (isPaused) {
             // 一時停止から再開
             setIsPaused(false);
+            isPausedRef.current = false;
+            const resumeSeconds = status?.elapsed_seconds ?? pausedElapsedSeconds;
             setStatus(prev => prev ? { ...prev, is_active: true } : null);
-            if (status) {
-                startLocalTimer(status.elapsed_seconds);
-                startSyncTimer(childId);
-            }
+            startLocalTimer(resumeSeconds);
+            startSyncTimer(childId);
             return;
         }
 
@@ -145,6 +174,8 @@ export default function ScreenTimePage() {
                 const data = await res.json();
                 setStatus(data);
                 setIsPaused(false);
+                isPausedRef.current = false;
+                setPausedElapsedSeconds(0);
                 startLocalTimer(0);
                 startSyncTimer(childId);
             }
@@ -154,16 +185,22 @@ export default function ScreenTimePage() {
 
     const handlePause = () => {
         // タイマーを一時停止
+        isPausedRef.current = true;
         clearTimers();
         setIsPaused(true);
         setStartTime(null);
-        setStatus(prev => prev ? { ...prev, is_active: false } : null);
+        if (status) {
+            setPausedElapsedSeconds(status.elapsed_seconds);
+        }
+        setStatus(prev => prev ? { ...prev, is_active: false, elapsed_seconds: prev.elapsed_seconds } : null);
     };
 
     const handleReset = () => {
         // タイマーをリセット
         clearTimers();
         setIsPaused(false);
+        isPausedRef.current = false;
+        setPausedElapsedSeconds(0);
         setStartTime(null);
         setStatus(prev => prev ? { ...prev, elapsed_seconds: 0, is_active: false, alert_level: 0 } : null);
     };
@@ -180,6 +217,8 @@ export default function ScreenTimePage() {
             if (res.ok) {
                 clearTimers();
                 setIsPaused(false);
+                isPausedRef.current = false;
+                setPausedElapsedSeconds(0);
                 setStartTime(null);
                 // 成功メッセージを表示（将来的にはモーダルなど）
                 alert('きろくしました！');
@@ -214,7 +253,7 @@ export default function ScreenTimePage() {
 
                 {/* Timer */}
                 <TimerDisplay
-                    seconds={status?.elapsed_seconds || 0}
+                    seconds={isPaused ? pausedElapsedSeconds : (status?.elapsed_seconds || 0)}
                     alertLevel={status?.alert_level || 0}
                 />
 
