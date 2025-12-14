@@ -51,20 +51,8 @@ export default function HomePage() {
     }
 
     return (
-        <div className="min-h-screen relative flex flex-col pb-24"
-             style={{
-                 background: 'linear-gradient(135deg, #E3F2FD 0%, #FFF9C4 100%)',
-             }}>
-            {/* 水玉のオーバーレイ */}
-            <div className="absolute inset-0 opacity-20 pointer-events-none"
-                 style={{
-                     backgroundImage: `radial-gradient(circle, #FF9EC4 10%, transparent 10%),
-                                      radial-gradient(circle, #00A0E9 10%, transparent 10%),
-                                      radial-gradient(circle, #FFD83B 10%, transparent 10%)`,
-                     backgroundSize: '80px 80px, 120px 120px, 100px 100px',
-                     backgroundPosition: '0 0, 40px 40px, 80px 20px'
-                 }}>
-            </div>
+        <div className="min-h-screen relative flex flex-col pb-24" style={{ backgroundColor: '#F6F9FB' }}>
+            <AnimatedBackground />
 
             <main className="relative z-10 flex-1 w-full max-w-md mx-auto">
                 {/* ヘッダー */}
@@ -161,10 +149,10 @@ export default function HomePage() {
                         style={{ color: '#999' }}
                     >
                         <span className="text-3xl mb-1">💪</span>
-                        <span className="text-base font-bold">めラックス</span>
+                        <span className="text-base font-bold">たいそう</span>
                     </button>
                     <button
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => router.push('/record')}
                         className="flex flex-col items-center text-gray-400 transition-colors min-w-[80px] min-h-[80px] justify-center"
                         style={{ color: '#999' }}
                     >
