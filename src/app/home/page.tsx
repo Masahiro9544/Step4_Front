@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import CharacterMessage from '@/components/home/CharacterMessage';
 import ResultSummary from '@/components/home/ResultSummary';
+import AnimatedBackground from '@/components/ui/AnimatedBackground';
 import { getHomeData } from '@/lib/api';
 import { HomeResponse } from '@/types/home';
 
