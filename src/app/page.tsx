@@ -46,7 +46,7 @@ export default function LoginPage() {
                     className="text-center mb-8"
                 >
                     <h1 className="text-6xl font-bold mb-3" style={{ color: '#00A0E9' }}>
-                        めとれ
+                        めめめ
                     </h1>
                     <p className="text-lg font-bold text-gray-600">目のげんきをまもろう</p>
                 </motion.div>

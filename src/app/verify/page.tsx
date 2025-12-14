@@ -49,7 +49,7 @@ function VerifyContent() {
                 >
                     <div className="text-6xl mb-4">🔐</div>
                     <h1 className="text-4xl font-bold mb-3" style={{ color: '#00A0E9' }}>
-                        にんしょうコード
+                        認証コード
                     </h1>
                     <p className="text-base font-bold text-gray-600">
                         {demoCode ? `コード: ${demoCode}` : 'メールに送られたコードを入力してください'}
@@ -101,7 +101,7 @@ function VerifyContent() {
                             }`}
                             style={{ backgroundColor: '#00A0E9' }}
                         >
-                            にんしょうする
+                            認証する
                         </button>
                     </form>
 
