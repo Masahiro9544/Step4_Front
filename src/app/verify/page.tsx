@@ -4,7 +4,11 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import AnimatedBackground from '@/components/ui/AnimatedBackground';
+import dynamic from 'next/dynamic';
+
+const AnimatedBackground = dynamic(() => import('@/components/ui/AnimatedBackground'), {
+    ssr: false,
+});
 
 function VerifyContent() {
     const [code, setCode] = useState('');

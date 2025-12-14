@@ -3,11 +3,15 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import CharacterMessage from '@/components/home/CharacterMessage';
 import ResultSummary from '@/components/home/ResultSummary';
-import AnimatedBackground from '@/components/ui/AnimatedBackground';
 import { getHomeData } from '@/lib/api';
 import { HomeResponse } from '@/types/home';
+
+const AnimatedBackground = dynamic(() => import('@/components/ui/AnimatedBackground'), {
+    ssr: false,
+});
 
 export default function HomePage() {
     const router = useRouter();
