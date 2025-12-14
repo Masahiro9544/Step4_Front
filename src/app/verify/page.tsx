@@ -44,12 +44,12 @@ function VerifyContent() {
                 <motion.div
                     initial={{ opacity: 0, y: -30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 0.3 }}
                     className="text-center mb-8"
                 >
                     <div className="text-6xl mb-4">🔐</div>
                     <h1 className="text-4xl font-bold mb-3" style={{ color: '#00A0E9' }}>
-                        にんしょうコード
+                        認証コード
                     </h1>
                     <p className="text-base font-bold text-gray-600">
                         {demoCode ? `コード: ${demoCode}` : 'メールに送られたコードを入力してください'}
@@ -60,7 +60,7 @@ function VerifyContent() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
+                    transition={{ duration: 0.3 }}
                     className="bg-white rounded-3xl shadow-lg p-8"
                 >
                     <form className="space-y-6" onSubmit={handleSubmit}>
@@ -101,7 +101,7 @@ function VerifyContent() {
                             }`}
                             style={{ backgroundColor: '#00A0E9' }}
                         >
-                            にんしょうする
+                            認証する
                         </button>
                     </form>
 
@@ -124,7 +124,7 @@ function VerifyContent() {
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4, duration: 0.5 }}
+                    transition={{ duration: 0.3 }}
                     className="mt-6 text-center"
                 >
                     <div className="bg-blue-50 rounded-2xl p-4 border-2 border-blue-100">

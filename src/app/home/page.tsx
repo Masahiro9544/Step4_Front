@@ -62,7 +62,7 @@ export default function HomePage() {
                     className="p-6 bg-white rounded-b-3xl shadow-md mb-6 relative"
                 >
                     <h1 className="text-4xl font-bold text-center" style={{ color: '#00A0E9' }}>
-                        めとれ
+                        めめめ
                     </h1>
                     <button
                         onClick={() => router.push('/settings')}
@@ -77,7 +77,7 @@ export default function HomePage() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 }}
+                    transition={{ duration: 0.3 }}
                 >
                     <CharacterMessage message={homeData?.character_message || 'がんばろう！'} />
                 </motion.div>
@@ -86,7 +86,7 @@ export default function HomePage() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
+                    transition={{ duration: 0.3 }}
                     className="w-full px-4 mb-6"
                 >
                     <h2 className="text-3xl font-bold mb-5 ml-1" style={{ color: '#00A0E9' }}>目のげんきチェック</h2>
@@ -125,7 +125,7 @@ export default function HomePage() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
+                        transition={{ duration: 0.3 }}
                     >
                         <ResultSummary results={homeData.last_results} />
                     </motion.div>
@@ -150,6 +150,7 @@ export default function HomePage() {
                     >
                         <span className="text-3xl mb-1">💪</span>
                         <span className="text-base font-bold">たいそう</span>
+                        <span className="text-base font-bold">めリラ</span>
                     </button>
                     <button
                         onClick={() => router.push('/record')}

@@ -7,8 +7,8 @@ import { motion } from 'framer-motion';
 import AnimatedBackground from '@/components/ui/AnimatedBackground';
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('demo@example.com');
+    const [password, setPassword] = useState('demo123');
     const { loginEmail, loginLine } = useAuth();
     const router = useRouter();
     const [error, setError] = useState('');
@@ -42,11 +42,11 @@ export default function LoginPage() {
                 <motion.div
                     initial={{ opacity: 0, y: -30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 0.3 }}
                     className="text-center mb-8"
                 >
                     <h1 className="text-6xl font-bold mb-3" style={{ color: '#00A0E9' }}>
-                        めとれ
+                        めめめ
                     </h1>
                     <p className="text-lg font-bold text-gray-600">目のげんきをまもろう</p>
                 </motion.div>
@@ -55,7 +55,7 @@ export default function LoginPage() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
+                    transition={{ duration: 0.3 }}
                     className="bg-white rounded-3xl shadow-lg p-8"
                 >
                     <h2 className="text-2xl font-bold text-center mb-6" style={{ color: '#00A0E9' }}>
@@ -172,7 +172,7 @@ export default function LoginPage() {
                 <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4, duration: 0.5 }}
+                    transition={{ duration: 0.3 }}
                     className="text-center text-sm text-gray-500 mt-6"
                 >
                     お子さまの目の健康を守るアプリ
