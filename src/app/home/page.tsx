@@ -74,7 +74,7 @@ export default function HomePage() {
                     className="p-6 bg-white rounded-b-3xl shadow-md mb-6 relative"
                 >
                     <h1 className="text-4xl font-bold text-center" style={{ color: '#00A0E9' }}>
-                        めとれ
+                        めめめ
                     </h1>
                     <button
                         onClick={() => router.push('/settings')}
@@ -161,7 +161,7 @@ export default function HomePage() {
                         style={{ color: '#999' }}
                     >
                         <span className="text-3xl mb-1">💪</span>
-                        <span className="text-base font-bold">めラックス</span>
+                        <span className="text-base font-bold">めリラ</span>
                     </button>
                     <button
                         onClick={() => router.push('/record')}
