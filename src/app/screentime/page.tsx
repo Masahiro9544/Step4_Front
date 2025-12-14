@@ -188,7 +188,9 @@ export default function ScreenTimePage() {
                 startLocalTimer(0);
                 startSyncTimer(childId);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error('Error in handleStart:', e);
+        }
         finally { setLoading(false); }
     };
 
