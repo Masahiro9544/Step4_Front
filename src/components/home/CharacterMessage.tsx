@@ -1,7 +1,6 @@
-export const dynamic = 'force-dynamic';
-
 import React from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface CharacterMessageProps {
     message: string;
@@ -24,12 +23,13 @@ export default function CharacterMessage({ message }: CharacterMessageProps) {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="w-32 h-32"
+                className="relative w-32 h-32"
             >
-                <img
+                <Image
                     src="/images/character/character_normal.png"
                     alt="犬のキャラクター"
-                    className="w-full h-full object-contain drop-shadow-xl"
+                    fill
+                    className="object-contain drop-shadow-xl"
                 />
             </motion.div>
         </div>

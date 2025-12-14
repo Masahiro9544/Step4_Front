@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Direction } from './useVisionTest';
 
@@ -68,8 +66,19 @@ export const useVoiceInput = (onAnswer: (dir: Direction | 'start') => void, isPa
         };
 
         recognitionInstance.onerror = (event: any) => {
-            console.error('音声認識エラー:', event.error);
+            // 致命的なエラー（許可拒否など）の場合は警告のみログ出力し、再起動しない
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                console.warn('Voice recognition permission denied or service not allowed:', event.error);
+                isActiveRef.current = false;
+                setError(`音声認識エラー: ${event.error}`);
+                setIsListening(false);
+                return;
+            }
+
             if (event.error === 'no-speech' || event.error === 'aborted') return;
+
+            console.error('音声認識エラー:', event.error);
+
             setError(`音声認識エラー: ${event.error}`);
             setIsListening(false);
         };

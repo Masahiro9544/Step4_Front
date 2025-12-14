@@ -20,7 +20,7 @@ export default function SettingsPage() {
 
     // Mock Parent ID for prototype
     const PARENT_ID = 1;
-    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000'}/api/v1`;
+    const API_BASE = 'http://localhost:8000/api';
 
     useEffect(() => {
         fetchData();

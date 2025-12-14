@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+import Image from 'next/image';
 
 type Props = {
     coveredEye: 'left' | 'right' | 'none';
@@ -7,10 +7,12 @@ type Props = {
 export default function VisionTestCharacter({ coveredEye }: Props) {
     return (
         <div className="relative w-28 h-28 mx-auto mb-4">
-            <img
+            <Image
                 src="/images/character/character_normal.png"
                 alt="Navi Character"
-                className="w-full h-full object-contain"
+                fill
+                className="object-contain"
+                priority
             />
 
             {/* Occluder (Spoon) Overlay */}

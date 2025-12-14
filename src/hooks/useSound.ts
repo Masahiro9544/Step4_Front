@@ -65,7 +65,18 @@ export function useSound() {
 
         const audio = new Audio(audioUrl);
         registerAudio(audio);
-        audio.play().catch(console.error);
+        const playPromise = audio.play();
+
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                // 自動再生ポリシーエラーや、play()直後のpause()による中断エラーを無視
+                if (error.name === 'NotAllowedError' || error.name === 'AbortError') {
+                    // console.log('Audio playback was prevented or interrupted:', error);
+                } else {
+                    console.error('Audio playback error:', error);
+                }
+            });
+        }
     }, [soundEnabled, stopAll, registerAudio]);
 
     return { soundEnabled, toggleSound, playSound, playButtonSound, playSuccessSound, stopAll };

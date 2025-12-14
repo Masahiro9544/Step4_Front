@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 import { ExerciseType } from '@/types/exercise';
 
 interface TodayProgressProps {

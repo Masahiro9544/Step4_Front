@@ -22,17 +22,39 @@ function TestContent() {
     const [isSetup, setIsSetup] = useState(true); // Setup phase state
     const [hasStarted, setHasStarted] = useState(false); // New: Explicit user start state
     const { speak, voiceCount, cancel } = useVoiceGuidance();
-    const { playSound } = useSound();
+    const { playSound, stopSound } = useSound();
+
+    // Ref to control guide sequence cancellation
+    const stopGuideRef = useRef(false);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            stopSound();
+            cancel();
+            stopGuideRef.current = true;
+        };
+    }, [stopSound, cancel]);
+
+    const handleQuit = useCallback(() => {
+        if (window.confirm('チェックをちゅうだんして、ホームにもどりますか？')) {
+            stopSound();
+            cancel();
+            router.push('/');
+        }
+    }, [stopSound, cancel, router]);
 
     const startTest = useCallback(() => {
+        stopGuideRef.current = true; // Stop any ongoing guide sequence
+        stopSound(); // Stop any guide audio
         setIsSetup(false);
         nextTest();
         speak('いくよ、あなが あいている ほうこうを おしえて！');
-    }, [nextTest, speak]);
+    }, [nextTest, speak, stopSound]);
 
     const handleAnswer = useCallback((dir: Direction | 'start') => {
         if (dir === 'start') {
-            playSound('tap.mp3');
+
             if (isSetup && hasStarted) {
                 startTest();
             }
@@ -56,34 +78,47 @@ function TestContent() {
         answer(dir);
     }, [speak, answer, isSetup, startTest, hasStarted, currentDirection, cancel, playSound]);
 
-    const { isListening, startListening, toggleListening } = useVoiceInput(handleAnswer, state.isPaused);
+    const { isListening, startListening, toggleListening, error } = useVoiceInput(handleAnswer, state.isPaused);
 
     // Initial setup with Interactive Guide
     const handleStartClick = () => {
-        playSound('tap.mp3');
+        stopSound();
+
         setHasStarted(true);
         cancel(); // Clear any stuck queue
         startListening();
+
+        // Reset cancellation ref for new session
+        stopGuideRef.current = false;
 
         // Interactive Guide Sequence
         const guide = async () => {
             const pause = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-            speak('いまから しりょくチェックを かいしします');
-            await pause(3000);
+            // speak('いまから しりょくチェックを かいしします');
+            // await pause(3000);
+            if (stopGuideRef.current) return;
 
             if (distance === '30cm') {
-                speak('がめんから 30センチ はなれよう');
+                // speak('がめんから 30センチ はなれよう');
+                playSound('shiryoku30cm.wav');
             } else {
-                speak('がめんから 3メートル はなれよう');
+                // speak('がめんから 3メートル はなれよう');
+                playSound('shiryoku3m.wav');
             }
-            await pause(3000);
+            await pause(5000); // Wait for distance voice (approx 5-7s -> 5s)
 
-            speak('みぎめを かくしてね');
-            await pause(3000);
 
-            speak('ともだちや おとなのひとに かくしてもらってね');
-            await pause(4000);
+
+            if (stopGuideRef.current) return;
+
+            stopSound(); // Ensure previous sound is stopped explicitly
+            console.log('Playing migimekarahidarime.wav');
+            playSound('migimekarahidarime.wav');
+            await pause(6000); // Wait for eye instruction
+
+            // speak('ともだちや おとなのひとに かくしてもらってね');
+            // await pause(4000);
 
             speak('じゅんびができたら、はじめます。オーケー、といってください');
         };
@@ -105,7 +140,6 @@ function TestContent() {
     }, [state.isFinished, state.eye, speak]);
 
     const handleNextEye = () => {
-        playSound('tap.mp3');
         if (state.result !== null) {
             setResults(prev => ({ ...prev, left: state.result! }));
         }
@@ -147,6 +181,37 @@ function TestContent() {
     };
 
     if (showResult) {
+        const leftVal = results.left ?? 0;
+        const rightVal = results.right ?? 0;
+        const minVal = Math.min(leftVal, rightVal);
+
+        let Suggestion = null;
+
+        if (minVal >= 1.0) {
+            // No specific suggestion
+        } else if (minVal >= 0.7) {
+            Suggestion = (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-left text-sm rounded-r-lg">
+                    <h3 className="font-bold text-lg text-yellow-700 mb-1">目のお医者さんでチェックしよう</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                        少し見えにくいかも。目のお医者さんでみてもらうと安心だよ。<br />
+                        必要ならZoffでも視力チェックができます。
+                    </p>
+                </div>
+            );
+        } else {
+            // 0.6 or lower (includes 0.5, 0.1)
+            Suggestion = (
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 text-left text-sm rounded-r-lg">
+                    <h3 className="font-bold text-lg text-red-700 mb-1">早めにチェックしよう</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                        見えづらいかもしれません。早めに目のお医者さんでみてもらってね。<br />
+                        必要ならZoffでも視力チェックができます。
+                    </p>
+                </div>
+            );
+        }
+
         return (
             <main className="flex min-h-screen flex-col items-center justify-center bg-[#E0F2F7] p-4 font-sans text-[#0093D0]">
                 <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center space-y-6 border-4 border-[#0093D0]">
@@ -164,9 +229,17 @@ function TestContent() {
                         </div>
                     </div>
 
+                    {Suggestion}
+
+                    <div className="mt-6 text-left border-t pt-4">
+                        <h3 className="font-bold text-gray-500 text-sm">たいせつなおしらせ</h3>
+                        <p className="text-gray-400 text-xs mt-1 leading-relaxed">
+                            このけんさは簡単なチェックです。正しい視力は目のお医者さんで調べてもらってね。
+                        </p>
+                    </div>
+
                     <button
                         onClick={() => {
-                            playSound('tap.mp3');
                             router.push('/');
                         }}
                         className="w-full py-4 bg-[#0093D0] hover:bg-[#007bb5] text-white rounded-2xl font-bold text-xl shadow-md transition-transform active:scale-95"
@@ -264,10 +337,14 @@ function TestContent() {
                         <div className={`text-2xl font-bold ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-400'}`}>
                             {isListening ? 'きいています...' : 'マイクじゅんびちゅう'}
                         </div>
+                        {error && (
+                            <div className="text-red-500 font-bold text-sm bg-red-50 px-3 py-1 rounded-lg">
+                                {error}
+                            </div>
+                        )}
 
                         <button
                             onClick={() => {
-                                playSound('tap.mp3');
                                 startTest();
                             }}
                             className="w-full py-4 bg-[#0093D0] hover:bg-[#007bb5] text-white rounded-2xl font-bold text-xl shadow-md transition-transform active:scale-95"
@@ -280,6 +357,10 @@ function TestContent() {
         );
     }
 
+
+
+
+
     const currentLevel = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2][state.currentLevelIndex];
     const sizePx = calculateSizePx(currentLevel);
 
@@ -288,11 +369,19 @@ function TestContent() {
             {/* Header & Character Group */}
             <div className="w-full flex flex-col items-center shrink-0">
                 {/* Header - Compact */}
-                <div className="w-full px-4 py-2 flex justify-between items-center text-[#0093D0] z-10">
-                    <span className="font-bold text-3xl">
+                <div className="w-full px-4 py-2 flex justify-between items-center text-[#0093D0] z-10 relative">
+                    <button
+                        onClick={handleQuit}
+                        className="bg-white text-[#0093D0] px-4 py-2 rounded-full font-bold shadow-sm hover:bg-gray-50 active:scale-95 transition-all text-sm absolute left-4"
+                    >
+                        × やめる
+                    </button>
+
+                    <span className="font-bold text-3xl mx-auto">
                         {state.eye === 'right' ? 'みぎめ' : 'ひだりめ'}
                     </span>
-                    <div className="flex items-center gap-2">
+
+                    <div className="flex items-center gap-2 absolute right-4">
                         {isListening && <span className="text-xs bg-red-100 text-red-500 px-2 py-1 rounded-full animate-pulse">おんせいON</span>}
                         <span className="text-sm font-bold bg-white px-3 py-1 rounded-full shadow-sm">
                             {distance}
@@ -302,10 +391,13 @@ function TestContent() {
 
                 {/* Character Guide - Compact area */}
                 <div className="mt-4 shrink-0 z-10 text-center">
-                    <img
+                    <Image
                         src="/images/character/shiryokucheck.jpeg"
                         alt="Guide Character"
-                        className="rounded-3xl border-4 border-white shadow-md mx-auto w-[150px] h-[150px] object-cover"
+                        width={150}
+                        height={150}
+                        className="rounded-3xl border-4 border-white shadow-md mx-auto"
+                        style={{ objectFit: 'cover' }}
                     />
                 </div>
             </div>

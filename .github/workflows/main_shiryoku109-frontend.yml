@@ -70,4 +70,5 @@ jobs:
           app-name: 'shiryoku109-frontend'
           slot-name: 'Production'
           package: ./deploy
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B8D3AEA5375B49D599C5FDBC4F94E4DB }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_66C7BAE27D8142BBB7F19754E56206CA }}
+
