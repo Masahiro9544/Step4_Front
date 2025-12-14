@@ -13,25 +13,35 @@ interface ControlButtonsProps {
 
 export default function ControlButtons({ isActive, isPaused, onStart, onPause, onReset, onRecord, isLoading }: ControlButtonsProps) {
     if (isActive) {
-        // タイマー動作中 → 「おわる」ボタンのみ
+        // タイマー動作中 → 「ストップ」「リセット」ボタン
         return (
             <div className="flex gap-4 w-full max-w-sm px-4">
                 <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={onPause}
                     disabled={isLoading}
-                    className="w-full py-8 text-white text-3xl font-black rounded-2xl shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-4 transition-opacity min-h-[100px]"
+                    className="flex-1 py-8 text-white text-3xl font-black rounded-2xl shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-4 transition-opacity min-h-[100px]"
                     style={{ backgroundColor: '#FF9EC4' }}
                 >
                     <span className="text-4xl">■</span>
-                    <span>おわる</span>
+                    <span>ストップ</span>
+                </motion.button>
+                <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={onReset}
+                    disabled={isLoading}
+                    className="flex-1 py-8 text-white text-3xl font-black rounded-2xl shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-4 transition-opacity min-h-[100px]"
+                    style={{ backgroundColor: '#999' }}
+                >
+                    <span className="text-4xl">↺</span>
+                    <span>リセット</span>
                 </motion.button>
             </div>
         );
     }
 
     if (isPaused) {
-        // 一時停止中 → 「はじめる」「リセット」「きろくする」ボタン
+        // ストップ中 → 「スタート」「リセット」「きろく」ボタン
         return (
             <div className="flex flex-col gap-4 w-full max-w-sm px-4">
                 <motion.button
@@ -42,27 +52,27 @@ export default function ControlButtons({ isActive, isPaused, onStart, onPause, o
                     style={{ backgroundColor: '#00A0E9' }}
                 >
                     <span className="text-4xl">▶</span>
-                    <span>つづける</span>
+                    <span>スタート</span>
                 </motion.button>
-                <div className="flex gap-4">
+                <div className="flex gap-4 w-full">
                     <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={onReset}
                         disabled={isLoading}
-                        className="flex-1 py-6 text-white text-2xl font-black rounded-2xl shadow-lg hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-3 transition-opacity"
+                        className="flex-1 py-8 text-white text-3xl font-black rounded-2xl shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-4 transition-opacity min-h-[100px]"
                         style={{ backgroundColor: '#999' }}
                     >
-                        <span className="text-3xl">↺</span>
+                        <span className="text-4xl">↺</span>
                         <span>リセット</span>
                     </motion.button>
                     <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={onRecord}
                         disabled={isLoading}
-                        className="flex-1 py-6 text-white text-2xl font-black rounded-2xl shadow-lg hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-3 transition-opacity"
+                        className="flex-1 py-8 text-white text-3xl font-black rounded-2xl shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-4 transition-opacity min-h-[100px]"
                         style={{ backgroundColor: '#FFD83B', color: '#333' }}
                     >
-                        <span className="text-3xl">✓</span>
+                        <span className="text-4xl">✓</span>
                         <span>きろく</span>
                     </motion.button>
                 </div>
@@ -70,7 +80,7 @@ export default function ControlButtons({ isActive, isPaused, onStart, onPause, o
         );
     }
 
-    // 初期状態 → 「はじめる」ボタンのみ
+    // 初期状態 → 「スタート」ボタンのみ
     return (
         <div className="flex gap-4 w-full max-w-sm px-4">
             <motion.button
@@ -81,7 +91,7 @@ export default function ControlButtons({ isActive, isPaused, onStart, onPause, o
                 style={{ backgroundColor: '#00A0E9' }}
             >
                 <span className="text-4xl">▶</span>
-                <span>はじめる</span>
+                <span>スタート</span>
             </motion.button>
         </div>
     );
