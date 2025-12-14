@@ -153,7 +153,7 @@ export default function HomePage() {
                         <span className="text-base font-bold">たいそう</span>
                     </button>
                     <button
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => router.push('/record')}
                         className="flex flex-col items-center text-gray-400 transition-colors min-w-[80px] min-h-[80px] justify-center"
                         style={{ color: '#999' }}
                     >
