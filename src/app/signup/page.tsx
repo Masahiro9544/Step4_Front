@@ -10,7 +10,7 @@ export default function SignupPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const { register } = useAuth();
+    const { register, loginEmail } = useAuth();
     const router = useRouter();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -26,8 +26,15 @@ export default function SignupPage() {
 
         setLoading(true);
         try {
+            // 登録処理
             await register(email, password);
-            router.push('/?registered=true');
+
+            // 登録成功後、自動的にログイン処理を実行
+            const data = await loginEmail(email, password);
+
+            // 認証コード画面に遷移
+            const verifyUrl = `/verify?session_id=${data.session_id}&code=${data.verification_code}`;
+            router.push(verifyUrl);
         } catch (err: any) {
             setError(err.response?.data?.detail || '登録に失敗しました。もう一度お試しください。');
         } finally {
