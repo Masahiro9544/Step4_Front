@@ -22,7 +22,7 @@ function AuthCallbackContent() {
                 .then(({ data }) => {
                     Cookies.set('access_token', data.access_token, { expires: 1 / 48 });
                     Cookies.set('refresh_token', data.refresh_token, { expires: 7 });
-                    router.push('/');
+                    router.push('/home');
                 })
                 .catch((err) => {
                     console.error(err);

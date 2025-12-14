@@ -79,7 +79,7 @@ export default function HomePage() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 }}
+                    transition={{ duration: 0.3 }}
                 >
                     <CharacterMessage message={homeData?.character_message || 'がんばろう！'} />
                 </motion.div>
@@ -88,7 +88,7 @@ export default function HomePage() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
+                    transition={{ duration: 0.3 }}
                     className="w-full px-4 mb-6"
                 >
                     <h2 className="text-3xl font-bold mb-5 ml-1" style={{ color: '#00A0E9' }}>目のげんきチェック</h2>
@@ -127,7 +127,7 @@ export default function HomePage() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
+                        transition={{ duration: 0.3 }}
                     >
                         <ResultSummary results={homeData.last_results} />
                     </motion.div>
