@@ -54,7 +54,7 @@ export default function LoginPage() {
                     transition={{ duration: 0.3 }}
                     className="text-center mb-8"
                 >
-                    <h1 className="text-6xl font-bold mb-3" style={{ color: '#00A0E9' }}>
+                    <h1 className="text-6xl font-bold mb-2" style={{ color: '#00A0E9' }}>
                         めめめ
                     </h1>
                     <p className="text-lg font-bold text-gray-600">目のげんきをまもろう</p>
@@ -65,9 +65,9 @@ export default function LoginPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
-                    className="bg-white rounded-3xl shadow-lg p-8"
+                    className="bg-white rounded-3xl shadow-lg px-8 py-6"
                 >
-                    <h2 className="text-2xl font-bold text-center mb-6" style={{ color: '#00A0E9' }}>
+                    <h2 className="text-2xl font-bold text-center mb-5" style={{ color: '#00A0E9' }}>
                         ログイン
                     </h2>
 
@@ -118,14 +118,14 @@ export default function LoginPage() {
 
                         <button
                             type="submit"
-                            className="w-full text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95 text-lg"
+                            className="w-full text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95 text-lg"
                             style={{ backgroundColor: '#00A0E9' }}
                         >
                             メールでログイン
                         </button>
                     </form>
 
-                    <div className="relative my-6">
+                    <div className="relative my-5">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t-2 border-gray-200"></div>
                         </div>
@@ -136,7 +136,7 @@ export default function LoginPage() {
 
                     <button
                         onClick={handleLineLogin}
-                        className="w-full flex items-center justify-center font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95 relative"
+                        className="w-full flex items-center justify-center font-bold py-2 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95 relative"
                         style={{
                             backgroundColor: '#06C755',
                             color: '#FFFFFF'
