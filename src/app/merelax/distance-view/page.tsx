@@ -48,7 +48,7 @@ export default function DistanceViewPage() {
             setMessage('エラーが発生しました');
             console.error(error);
         }
-    }, [childId, playSound, playSuccessSound, speak, router]);
+    }, [selectedChildId, playSound, playSuccessSound, speak, router]);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
