@@ -50,14 +50,14 @@ export interface EyeTestResult {
     test_type: string;
 }
 
-export const saveEyeTest = async (leftEye: number | undefined, rightEye: number | undefined, testType: string) => {
+export const saveEyeTest = async (childId: number, leftEye: number | undefined, rightEye: number | undefined, testType: string) => {
     try {
         const response = await fetch(`${API_URL}/eyetests`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ child_id: 1, left_eye: leftEye, right_eye: rightEye, test_type: testType }),
+            body: JSON.stringify({ child_id: childId, left_eye: leftEye, right_eye: rightEye, test_type: testType }),
         });
         if (!response.ok) {
             throw new Error('Failed to save eye test');
