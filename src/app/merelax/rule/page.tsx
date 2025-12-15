@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SoundToggle from '@/components/merelax/SoundToggle';
 import { useSound } from '@/hooks/useSound';
 import { logExercise } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 // スライドデータ定義
 const SLIDES = [
@@ -51,6 +52,7 @@ const SLIDES = [
 export default function RulePage() {
     const router = useRouter();
     const { playSound, playSuccessSound } = useSound();
+    const { selectedChildId } = useAuth();
 
     // 状態管理
     const [isStarted, setIsStarted] = useState(false);
@@ -84,17 +86,17 @@ export default function RulePage() {
         };
     }, [isStarted, currentSlideIndex, isCompleted, playSound]);
 
-    const childId = 1; // TODO: ログイン情報から取得
-
     const handleComplete = async () => {
         setIsCompleted(true);
         playSuccessSound();
         playSound('/sounds/owarimerelax.wav');
 
+        if (!selectedChildId) return;
+
         try {
             const today = new Date().toISOString().split('T')[0];
             // ID 4 for Rule (added to backend crud.py)
-            await logExercise(childId, {
+            await logExercise(selectedChildId, {
                 exercise_id: 4,
                 exercise_date: today,
             });

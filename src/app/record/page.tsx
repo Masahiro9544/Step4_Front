@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useAuth } from '@/context/AuthContext';
 
 // ダッシュボード用の型定義
 interface Child {
@@ -40,6 +41,7 @@ interface ScreenTimeData {
 
 export default function DashboardPage() {
     const router = useRouter();
+    const { user, selectedChildId } = useAuth();
     const [children, setChildren] = useState<Child[]>([]);
     const [selectedChild, setSelectedChild] = useState<number | null>(null);
     const [visionData, setVisionData] = useState<VisionData[]>([]);
@@ -64,9 +66,10 @@ export default function DashboardPage() {
     }, [selectedChild, visionPeriod, screenTimeView]);
 
     const fetchChildren = async () => {
+        if (!user) return;
+
         try {
-            // Hardcoded parent_id=1 for demo purposes as requested
-            const parentId = 1;
+            const parentId = user.parent_id;
             const res = await fetch(`${API_BASE}/dashboard/parent/${parentId}`);
             if (res.ok) {
                 const data = await res.json();

@@ -1,29 +1,21 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import api from '../../../utils/axios';
-import Cookies from 'js-cookie';
-
+import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 function AuthCallbackContent() {
     const searchParams = useSearchParams();
-    const router = useRouter();
+    const { handleLineCallback } = useAuth();
     const [status, setStatus] = useState('Verifying...');
 
     useEffect(() => {
         const code = searchParams.get('code');
         const state = searchParams.get('state');
 
-        if (code) {
-            // Exchange code for token
-            api.post('/auth/line/callback', { code, state })
-                .then(({ data }) => {
-                    Cookies.set('access_token', data.access_token, { expires: 1 / 48 });
-                    Cookies.set('refresh_token', data.refresh_token, { expires: 7 });
-                    router.push('/home');
-                })
+        if (code && state) {
+            handleLineCallback(code, state)
                 .catch((err) => {
                     console.error(err);
                     setStatus('Login failed. Please try again.');
@@ -31,7 +23,7 @@ function AuthCallbackContent() {
         } else {
             setStatus('Invalid callback parameters.');
         }
-    }, [searchParams, router]);
+    }, [searchParams, handleLineCallback]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">

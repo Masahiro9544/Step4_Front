@@ -7,9 +7,11 @@ import { Settings, Child, ChildCreate, ChildUpdate } from '@/types/settings';
 import ChildSelector from '@/components/settings/ChildSelector';
 import SettingsToggle from '@/components/settings/SettingsToggle';
 import ChildForm from '@/components/settings/ChildForm';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SettingsPage() {
     const router = useRouter();
+    const { logout } = useAuth();
     const [settings, setSettings] = useState<Settings | null>(null);
     const [childrenList, setChildrenList] = useState<Child[]>([]);
     const [loading, setLoading] = useState(true);
@@ -180,12 +182,24 @@ export default function SettingsPage() {
                 </section>
 
                 {/* Save/Confirm Button (Actually saving happens immediately on change but user likes confirmation button) */}
-                <div className="pt-8">
+                <div className="pt-8 space-y-3">
                     <button
                         onClick={handleBack}
                         className="w-full py-4 bg-merelax-primary text-white text-lg font-bold rounded-2xl shadow-lg hover:bg-blue-600 active:scale-95 transition-all"
                     >
                         💾 けってい
+                    </button>
+
+                    {/* Logout Button */}
+                    <button
+                        onClick={() => {
+                            if (confirm('ログアウトしますか？')) {
+                                logout();
+                            }
+                        }}
+                        className="w-full py-4 bg-white border-2 border-red-300 text-red-600 text-lg font-bold rounded-2xl hover:bg-red-50 active:scale-95 transition-all"
+                    >
+                        🚪 ログアウト
                     </button>
                 </div>
 

@@ -8,6 +8,7 @@ import SoundToggle from '@/components/merelax/SoundToggle';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import CharacterBlink from '@/components/merelax/CharacterBlink';
 import { useSound } from '@/hooks/useSound';
+import { useAuth } from '@/context/AuthContext';
 
 export default function BlinkPage() {
     const router = useRouter();
@@ -17,9 +18,7 @@ export default function BlinkPage() {
     const [characterBlinking, setCharacterBlinking] = useState(false);
     const { playSuccessSound, playSound } = useSound();
     const { speak } = useTextToSpeech();
-
-    // TODO: 実際のchild_idはログイン情報から取得
-    const childId = 1;
+    const { selectedChildId } = useAuth();
 
     // リズムガイド音声
     useEffect(() => {
@@ -57,6 +56,8 @@ export default function BlinkPage() {
     }, [isStarted, isCompleted, speak, playSound]);
 
     const handleComplete = async () => {
+        if (!selectedChildId) return;
+
         try {
             // 成功音SE
             playSuccessSound();
@@ -64,7 +65,7 @@ export default function BlinkPage() {
             speak("すごい！ めが スッキリ したね");
 
             const today = new Date().toISOString().split('T')[0];
-            const response = await logExercise(childId, {
+            const response = await logExercise(selectedChildId, {
                 exercise_id: 2, // blink
                 exercise_date: today,
             });

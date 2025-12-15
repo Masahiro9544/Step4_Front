@@ -7,9 +7,9 @@ import { logExercise } from '@/lib/api';
 import SoundToggle from '@/components/merelax/SoundToggle';
 import CloudBackground from '@/components/merelax/CloudBackground';
 import { useSound } from '@/hooks/useSound';
-
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import CharacterDistance from '@/components/merelax/CharacterDistance';
+import { useAuth } from '@/context/AuthContext';
 
 export default function DistanceViewPage() {
     const router = useRouter();
@@ -18,13 +18,13 @@ export default function DistanceViewPage() {
     const [message, setMessage] = useState('');
     const { playSuccessSound, playSound } = useSound();
     const { speak } = useTextToSpeech();
-
-    // TODO: 実際のchild_idはログイン情報から取得
-    const childId = 1;
+    const { selectedChildId } = useAuth();
 
     const [isStarted, setIsStarted] = useState(false);
 
     const handleComplete = useCallback(async () => {
+        if (!selectedChildId) return;
+
         try {
             // 成功音SE
             playSuccessSound();
@@ -32,7 +32,7 @@ export default function DistanceViewPage() {
             speak("よくやったね！");
 
             const today = new Date().toISOString().split('T')[0];
-            const response = await logExercise(childId, {
+            const response = await logExercise(selectedChildId, {
                 exercise_id: 1, // distance_view
                 exercise_date: today,
             });
