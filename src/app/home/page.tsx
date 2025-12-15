@@ -115,7 +115,9 @@ export default function HomePage() {
                         }}
                         aria-label="設定"
                     >
-                        <span className="text-2xl">⚙️</span>
+                        <div className="relative w-8 h-8">
+                            <Image src="/images/icon/cogwheel.png" alt="設定" fill className="object-contain" />
+                        </div>
                     </motion.button>
                 </motion.header>
 
