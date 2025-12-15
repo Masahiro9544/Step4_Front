@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import Footer from '@/components/Footer';
 
 // ダッシュボード用の型定義
 interface Child {
@@ -401,6 +402,8 @@ export default function DashboardPage() {
                     </div>
                 </motion.div>
             </div>
+
+            <Footer activeTab="record" />
         </main>
     );
 }
