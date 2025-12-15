@@ -122,14 +122,12 @@ export default function HomePage() {
                     }}
                 >
                     <div className="flex items-center justify-center gap-3">
-                        <div className="text-5xl">👁️</div>
                         <h1 className="text-5xl font-black tracking-wider" style={{
                             color: '#00A0E9',
                             textShadow: '2px 2px 0px #FFD83B, 4px 4px 0px rgba(0,0,0,0.1)'
                         }}>
                             めめめ
                         </h1>
-                        <div className="text-5xl">👁️</div>
                     </div>
                     <p className="text-center text-sm font-bold mt-2" style={{ color: '#FF9EC4' }}>
                         〜めのけんこうをまもろう〜

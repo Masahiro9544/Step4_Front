@@ -12,6 +12,7 @@ export interface LastResults {
     distance_check_date?: string;
     avg_distance_cm?: number;
     posture_score?: number;
+    total_screentime_minutes?: number;
 }
 
 export interface HomeResponse {
