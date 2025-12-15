@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import Footer from '@/components/Footer';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/context/AuthContext';
 
@@ -595,6 +596,8 @@ export default function DashboardPage() {
                     </div>
                 </motion.div>
             </div>
+
+            <Footer activeTab="record" />
         </main>
     );
 }
