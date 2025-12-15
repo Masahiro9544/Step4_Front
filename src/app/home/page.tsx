@@ -253,7 +253,9 @@ export default function HomePage() {
                             boxShadow: '0 3px 10px rgba(0, 160, 233, 0.2)'
                         }}
                     >
-                        <span className="text-3xl mb-1">🏠</span>
+                        <div className="relative w-12 h-12 mb-1">
+                            <Image src="/images/icon/house.png" alt="ホーム" fill className="object-contain" />
+                        </div>
                         <span className="text-sm font-extrabold">ホーム</span>
                     </motion.button>
                     <motion.button
@@ -263,7 +265,9 @@ export default function HomePage() {
                         className="flex flex-col items-center transition-all min-w-[85px] min-h-[75px] justify-center rounded-2xl p-2"
                         style={{ color: '#999' }}
                     >
-                        <span className="text-3xl mb-1">💪</span>
+                        <div className="relative w-12 h-12 mb-1">
+                            <Image src="/images/icon/eyes.png" alt="めリラ" fill className="object-contain" />
+                        </div>
                         <span className="text-sm font-bold">めリラ</span>
                     </motion.button>
                     <motion.button
@@ -273,7 +277,9 @@ export default function HomePage() {
                         className="flex flex-col items-center transition-all min-w-[85px] min-h-[75px] justify-center rounded-2xl p-2"
                         style={{ color: '#999' }}
                     >
-                        <span className="text-3xl mb-1">📊</span>
+                        <div className="relative w-12 h-12 mb-1">
+                            <Image src="/images/icon/statistics.png" alt="きろく" fill className="object-contain" />
+                        </div>
                         <span className="text-sm font-bold">きろく</span>
                     </motion.button>
                 </div>
