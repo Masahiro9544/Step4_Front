@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 
 const AnimatedBackground = dynamic(() => import('@/components/ui/AnimatedBackground'), {
     ssr: false,
@@ -46,8 +47,9 @@ export default function LoginPage() {
         <div className="min-h-screen relative flex flex-col items-center justify-center" style={{ backgroundColor: '#F6F9FB' }}>
             <AnimatedBackground />
 
-            <div className="relative z-10 w-full max-w-md px-8 sm:px-6 py-8">
+            <div className="relative z-10 w-full max-w-md px-8 sm:px-6 pb-4">
                 {/* ロゴ・タイトル */}
+                {/* 元のテキストタイトル（戻す時用にコメントアウト）
                 <motion.div
                     initial={{ opacity: 0, y: -30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -58,6 +60,24 @@ export default function LoginPage() {
                         めめめ
                     </h1>
                     <p className="text-lg font-bold text-gray-600">目のげんきをまもろう</p>
+                </motion.div>
+                */}
+
+                {/* 画像タイトル */}
+                <motion.div
+                    initial={{ opacity: 0, y: -30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-center flex justify-center -mb-7"
+                >
+                    <div className="relative w-40 h-40">
+                        <Image
+                            src="/images/character/head.png"
+                            alt="めめめ"
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
                 </motion.div>
 
                 {/* ログインフォーム */}
