@@ -46,7 +46,7 @@ export default function LoginPage() {
         <div className="min-h-screen relative flex flex-col items-center justify-center" style={{ backgroundColor: '#F6F9FB' }}>
             <AnimatedBackground />
 
-            <div className="relative z-10 w-full max-w-md px-6">
+            <div className="relative z-10 w-full max-w-md px-8 sm:px-6 py-8">
                 {/* ロゴ・タイトル */}
                 <motion.div
                     initial={{ opacity: 0, y: -30 }}
