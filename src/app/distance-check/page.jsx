@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import StartScreen from '../../components/DistanceCheck/StartScreen';
 import ResultScreen from '../../components/DistanceCheck/ResultScreen';
-// CloudBackground removed as per previous request
 
 // Dynamically import MeasuringScreen to prevent SSR issues with face-api.js
 const MeasuringScreen = dynamic(
@@ -43,23 +43,30 @@ export default function DistanceCheckPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative">
+        <main className="min-h-screen pb-20 safe-area-inset-bottom" style={{ backgroundColor: '#F6F9FB' }}>
+            <header className="px-6 py-6 flex items-center bg-white shadow-md rounded-b-3xl sticky top-0 z-10">
+                <Link href="/" className="flex items-center font-bold text-gray-600 hover:text-gray-800 transition-colors">
+                    <span className="text-2xl mr-2">←</span>
+                    <span className="text-lg">もどる</span>
+                </Link>
+                <h1 className="flex-1 text-center text-3xl font-bold pr-20 leading-tight" style={{ color: '#00A0E9' }}>
+                    📏 スマホ画面距離チェッカー
+                </h1>
+            </header>
 
-            <h1 className="text-2xl font-bold mb-6 text-center text-blue-800 relative z-10 px-6 py-2">
-                スマホ画面距離チェッカー
-            </h1>
-
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden p-6 relative min-h-[500px] flex flex-col items-center z-10 border border-gray-100 ring-1 ring-gray-100">
-                {step === 'start' && <StartScreen onStart={handleStart} />}
-                {step === 'measuring' && <MeasuringScreen onComplete={handleMeasurementComplete} />}
-                {step === 'result' && (
-                    <ResultScreen
-                        distance={distanceResult}
-                        onRetry={handleRetry}
-                        onSave={handleSaveComplete}
-                    />
-                )}
+            <div className="p-4 flex flex-col items-center gap-8">
+                <div className="w-full max-w-md">
+                    {step === 'start' && <StartScreen onStart={handleStart} />}
+                    {step === 'measuring' && <MeasuringScreen onComplete={handleMeasurementComplete} />}
+                    {step === 'result' && (
+                        <ResultScreen
+                            distance={distanceResult}
+                            onRetry={handleRetry}
+                            onSave={handleSaveComplete}
+                        />
+                    )}
+                </div>
             </div>
-        </div>
+        </main>
     );
 }
