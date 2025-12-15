@@ -6,9 +6,10 @@ interface ChildFormProps {
     onSubmit: (data: ChildCreate | ChildUpdate) => void;
     onCancel: () => void;
     isEditing: boolean;
+    parentId: number;
 }
 
-export default function ChildForm({ initialData, onSubmit, onCancel, isEditing }: ChildFormProps) {
+export default function ChildForm({ initialData, onSubmit, onCancel, isEditing, parentId }: ChildFormProps) {
     const [name, setName] = useState('');
     const [grade, setGrade] = useState('');
     const [age, setAge] = useState<string>('');
@@ -25,10 +26,9 @@ export default function ChildForm({ initialData, onSubmit, onCancel, isEditing }
         e.preventDefault();
         const ageNum = age ? parseInt(age) : undefined;
 
-        // For prototype, assuming parent_id is 1
         const formData = isEditing
             ? { name, grade, age: ageNum }
-            : { parent_id: 1, name, grade, age: ageNum };
+            : { parent_id: parentId, name, grade, age: ageNum };
 
         onSubmit(formData);
     };
