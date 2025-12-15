@@ -100,7 +100,7 @@ export default function DashboardPage() {
         if (!selectedChild) return;
 
         try {
-            const res = await fetch(`${API_BASE}/dashboard/child/${selectedChild}`);
+            const res = await fetch(`${API_BASE}/dashboard/child/${selectedChild}`, { cache: 'no-store' });
             if (res.ok) {
                 const data = await res.json();
 
