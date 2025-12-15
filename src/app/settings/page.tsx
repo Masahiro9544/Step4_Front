@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function SettingsPage() {
     const router = useRouter();
-    const { user, logout, selectChild } = useAuth();
+    const { user, logout, selectChild, selectedChildId } = useAuth();
     const [settings, setSettings] = useState<Settings | null>(null);
     const [childrenList, setChildrenList] = useState<Child[]>([]);
     const [loading, setLoading] = useState(true);
@@ -54,18 +54,10 @@ export default function SettingsPage() {
 
     const handleChildSelect = async (childId: number) => {
         if (!settings || !user?.parent_id) return;
-        try {
-            const res = await fetch(`${API_BASE}/settings/${user.parent_id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ child_id: childId })
-            });
-            if (res.ok) {
-                setSettings(await res.json());
-                // Update AuthContext as well
-                selectChild(childId);
-            }
-        } catch (e) { console.error(e); }
+        // Update AuthContext (which now persists to backend)
+        await selectChild(childId);
+        // Update local settings state for UI consistency if needed, though ChildSelector should use selectedChildId
+        setSettings({ ...settings, child_id: childId });
     };
 
     const handleVoiceToggle = async (enabled: boolean) => {
@@ -139,7 +131,7 @@ export default function SettingsPage() {
                         <div className="space-y-4">
                             <ChildSelector
                                 childrenList={childrenList}
-                                selectedChildId={settings?.child_id}
+                                selectedChildId={selectedChildId ?? settings?.child_id}
                                 onSelect={handleChildSelect}
                             />
 

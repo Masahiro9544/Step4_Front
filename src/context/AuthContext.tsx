@@ -21,7 +21,7 @@ interface AuthContextType {
     loading: boolean;
     children: Child[];
     selectedChildId: number | null;
-    selectChild: (childId: number) => void;
+    selectChild: (childId: number) => Promise<void>;
     loginEmail: (email: string, password: string) => Promise<any>;
     register: (email: string, password: string) => Promise<any>;
     verifyCode: (sessionId: string, code: string) => Promise<void>;
@@ -39,9 +39,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
     const router = useRouter();
 
-    const selectChild = (childId: number) => {
+    const selectChild = async (childId: number) => {
         setSelectedChildId(childId);
         localStorage.setItem('selectedChildId', String(childId));
+
+        if (user?.parent_id) {
+            try {
+                await api.put(`/settings/${user.parent_id}`, { child_id: childId });
+            } catch (error) {
+                console.error("Failed to persist selected child", error);
+            }
+        }
     };
 
     const fetchChildren = async (accessToken?: string) => {
