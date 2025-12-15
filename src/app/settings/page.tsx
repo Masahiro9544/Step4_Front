@@ -9,6 +9,8 @@ import SettingsToggle from '@/components/settings/SettingsToggle';
 import ChildForm from '@/components/settings/ChildForm';
 import { useAuth } from '@/context/AuthContext';
 
+import api from '@/utils/axios';
+
 export default function SettingsPage() {
     const router = useRouter();
     const { user, logout, selectChild, selectedChildId } = useAuth();
@@ -19,8 +21,6 @@ export default function SettingsPage() {
     // UI States
     const [showChildForm, setShowChildForm] = useState(false);
     const [isEditingChild, setIsEditingChild] = useState(false);
-
-    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`;
 
     useEffect(() => {
         if (user?.parent_id) {
@@ -34,16 +34,12 @@ export default function SettingsPage() {
         setLoading(true);
         try {
             // 1. Fetch Settings
-            const settingsRes = await fetch(`${API_BASE}/settings/${user.parent_id}`);
-            if (settingsRes.ok) {
-                setSettings(await settingsRes.json());
-            }
+            const { data: settingsData } = await api.get(`/settings/${user.parent_id}`);
+            setSettings(settingsData);
 
             // 2. Fetch Children
-            const childrenRes = await fetch(`${API_BASE}/child/all/${user.parent_id}`);
-            if (childrenRes.ok) {
-                setChildrenList(await childrenRes.json());
-            }
+            const { data: childrenData } = await api.get(`/child/all/${user.parent_id}`);
+            setChildrenList(childrenData);
 
         } catch (e) {
             console.error("Failed to fetch settings data", e);
@@ -66,11 +62,7 @@ export default function SettingsPage() {
         setSettings({ ...settings, voice_enabled: enabled });
 
         try {
-            await fetch(`${API_BASE}/settings/${user.parent_id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ voice_enabled: enabled })
-            });
+            await api.put(`/settings/${user.parent_id}`, { voice_enabled: enabled });
             // No need to setSettings from response if optimistic update worked, but safer to do so or ignore
         } catch (e) {
             // Revert on error
@@ -84,21 +76,13 @@ export default function SettingsPage() {
             let res;
             if (isEditingChild && settings?.child_id) {
                 // Update
-                res = await fetch(`${API_BASE}/child/${settings.child_id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+                res = await api.put(`/child/${settings.child_id}`, data);
             } else {
                 // Create
-                res = await fetch(`${API_BASE}/child/add`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+                res = await api.post('/child/add', data);
             }
 
-            if (res.ok) {
+            if (res.status === 200) {
                 setShowChildForm(false);
                 setIsEditingChild(false);
                 fetchData(); // Refresh all
