@@ -7,9 +7,11 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import CharacterMessage from '@/components/home/CharacterMessage';
 import ResultSummary from '@/components/home/ResultSummary';
+import ChildSelectorModal from '@/components/auth/ChildSelector';
 import { getHomeData } from '@/lib/api';
 import { HomeResponse } from '@/types/home';
 import { useSound } from '@/hooks/useRfpSound';
+import { useAuth } from '@/context/AuthContext';
 
 const AnimatedBackground = dynamic(() => import('@/components/ui/AnimatedBackground'), {
     ssr: false,
@@ -21,21 +23,23 @@ export default function HomePage() {
     const [loading, setLoading] = useState(true);
     const [clickedButton, setClickedButton] = useState<string | null>(null);
     const { playSound } = useSound();
-
-    // TODO: 実際のchild_idはログイン情報から取得
-    const childId = 1;
+    const { selectedChildId, user, loading: authLoading } = useAuth();
 
     useEffect(() => {
         // Play welcome audio on home mount
-        console.log('Playing home welcome audio');
         playSound('mememestarrt.wav');
 
         fetchHomeData();
-    }, [playSound]);
+    }, [playSound, selectedChildId]);
 
     const fetchHomeData = async () => {
+        if (!selectedChildId) {
+            setLoading(false);
+            return;
+        }
+
         try {
-            const data = await getHomeData(childId);
+            const data = await getHomeData(selectedChildId);
             setHomeData(data);
         } catch (error) {
             console.error('ホームデータの取得エラー:', error);
@@ -55,7 +59,23 @@ export default function HomePage() {
         }
     };
 
-    if (loading) {
+    // Show loading while auth is being checked
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-bg-main flex items-center justify-center">
+                <div className="animate-bounce text-merelax-primary text-2xl font-bold">●</div>
+            </div>
+        );
+    }
+
+    // If auth is done loading but no user, redirect to login
+    if (!authLoading && !user) {
+        router.push('/');
+        return null;
+    }
+
+    // Show loading while fetching home data
+    if (loading && selectedChildId === null) {
         return (
             <div className="min-h-screen bg-bg-main flex items-center justify-center">
                 <div className="animate-bounce text-merelax-primary text-2xl font-bold">●</div>
@@ -64,10 +84,12 @@ export default function HomePage() {
     }
 
     return (
-        <div className="min-h-screen relative flex flex-col pb-24"
-            style={{
-                background: 'linear-gradient(135deg, #E3F2FD 0%, #FFF3E0 50%, #FFF9C4 100%)',
-            }}>
+        <>
+            <ChildSelectorModal />
+            <div className="min-h-screen relative flex flex-col pb-24"
+                style={{
+                    background: 'linear-gradient(135deg, #E3F2FD 0%, #FFF3E0 50%, #FFF9C4 100%)',
+                }}>
             {/* かわいい水玉と星のオーバーレイ */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 {/* 水玉パターン */}
@@ -281,6 +303,7 @@ export default function HomePage() {
                 </div>
             </nav>
         </div>
+        </>
     );
 }
 

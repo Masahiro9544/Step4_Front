@@ -12,9 +12,12 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = Cookies.get('access_token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Only add token from cookie if Authorization header is not already set
+        if (!config.headers.Authorization) {
+            const token = Cookies.get('access_token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
         return config;
     },

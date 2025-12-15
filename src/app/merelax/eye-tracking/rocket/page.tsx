@@ -7,6 +7,7 @@ import { logExercise } from '@/lib/api';
 import SoundToggle from '@/components/merelax/SoundToggle';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useSound } from '@/hooks/useSound';
+import { useAuth } from '@/context/AuthContext';
 
 export default function EyeTrackingPage() {
     const router = useRouter();
@@ -16,9 +17,7 @@ export default function EyeTrackingPage() {
     const [animationPhase, setAnimationPhase] = useState('phase1');
     const { playSuccessSound, playSound } = useSound();
     const { speak } = useTextToSpeech();
-
-    // TODO: 実際のchild_idはログイン情報から取得
-    const childId = 1;
+    const { selectedChildId } = useAuth();
 
     // 1. アニメーション制御 (宣言的)
     // useEffect削除 - stateとvariantsで制御
@@ -44,6 +43,8 @@ export default function EyeTrackingPage() {
     }, [isStarted, isCompleted, speak, playSound]);
 
     const handleComplete = async () => {
+        if (!selectedChildId) return;
+
         try {
             // 成功音SE
             playSuccessSound();
@@ -51,7 +52,7 @@ export default function EyeTrackingPage() {
             speak("すごい しゅうちゅうりょく だね！");
 
             const today = new Date().toISOString().split('T')[0];
-            const response = await logExercise(childId, {
+            const response = await logExercise(selectedChildId, {
                 exercise_id: 3, // eye_tracking
                 exercise_date: today,
             });

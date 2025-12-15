@@ -9,13 +9,24 @@ interface User {
     line_id?: string;
 }
 
+interface Child {
+    child_id: number;
+    name: string;
+    age?: number;
+    grade?: string;
+}
+
 interface AuthContextType {
     user: User | null;
     loading: boolean;
+    children: Child[];
+    selectedChildId: number | null;
+    selectChild: (childId: number) => void;
     loginEmail: (email: string, password: string) => Promise<any>;
     register: (email: string, password: string) => Promise<any>;
     verifyCode: (sessionId: string, code: string) => Promise<void>;
     loginLine: () => Promise<void>;
+    handleLineCallback: (code: string, state: string) => Promise<void>;
     logout: () => void;
 }
 
@@ -24,7 +35,44 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [childrenList, setChildrenList] = useState<Child[]>([]);
+    const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
     const router = useRouter();
+
+    const selectChild = (childId: number) => {
+        setSelectedChildId(childId);
+        localStorage.setItem('selectedChildId', String(childId));
+    };
+
+    const fetchChildren = async (accessToken?: string) => {
+        try {
+            const config = accessToken ? {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            } : {};
+            const { data } = await api.get('/auth/children', config);
+            setChildrenList(data.children);
+
+            // Load selected child from localStorage first
+            const savedChildId = localStorage.getItem('selectedChildId');
+
+            // If only one child, auto-select
+            if (data.children.length === 1) {
+                selectChild(data.children[0].child_id);
+                return data.children[0].child_id;
+            } else if (savedChildId) {
+                // Verify saved child is still valid
+                const savedChildExists = data.children.some((child: Child) => child.child_id === Number(savedChildId));
+                if (savedChildExists) {
+                    setSelectedChildId(Number(savedChildId));
+                    return Number(savedChildId);
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error("Failed to fetch children", error);
+            return null;
+        }
+    };
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -33,6 +81,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 try {
                     const { data } = await api.get('/auth/me');
                     setUser(data);
+
+                    // Fetch children for this parent
+                    await fetchChildren();
                 } catch (error) {
                     console.error("Auth check failed", error);
                     // If 401, interceptor should have handled refresh or redirect
@@ -60,12 +111,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             verification_code: code,
         });
 
-        // Save tokens
+        // Save tokens with path option to ensure they're available across the app
         // Access token: 30 mins (1/48 days), Refresh token: 7 days
-        Cookies.set('access_token', data.access_token, { expires: 1 / 48 });
-        Cookies.set('refresh_token', data.refresh_token, { expires: 7 });
+        // SameSite: Lax for security while allowing navigation
+        Cookies.set('access_token', data.access_token, {
+            expires: 1 / 48,
+            path: '/',
+            sameSite: 'Lax'
+        });
+        Cookies.set('refresh_token', data.refresh_token, {
+            expires: 7,
+            path: '/',
+            sameSite: 'Lax'
+        });
 
         setUser(data.user);
+
+        // Fetch children after successful login, passing the access_token directly
+        await fetchChildren(data.access_token);
+
+        // Use router.push to maintain client-side state
         router.push('/home');
     };
 
@@ -78,15 +143,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
+    const handleLineCallback = async (code: string, state: string) => {
+        const { data } = await api.post('/auth/line/callback', { code, state });
+
+        // Save tokens with path option to ensure they're available across the app
+        Cookies.set('access_token', data.access_token, {
+            expires: 1 / 48,
+            path: '/',
+            sameSite: 'Lax'
+        });
+        Cookies.set('refresh_token', data.refresh_token, {
+            expires: 7,
+            path: '/',
+            sameSite: 'Lax'
+        });
+
+        setUser(data.user);
+
+        // Fetch children after successful login, passing the access_token directly
+        await fetchChildren(data.access_token);
+
+        // Use router.push to maintain client-side state
+        router.push('/home');
+    };
+
     const logout = () => {
         Cookies.remove('access_token');
         Cookies.remove('refresh_token');
+        localStorage.removeItem('selectedChildId');
         setUser(null);
+        setChildrenList([]);
+        setSelectedChildId(null);
         router.push('/');
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, loginEmail, register, verifyCode, loginLine, logout }}>
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            children: childrenList,
+            selectedChildId,
+            selectChild,
+            loginEmail,
+            register,
+            verifyCode,
+            loginLine,
+            handleLineCallback,
+            logout
+        }}>
             {children}
         </AuthContext.Provider>
     );
