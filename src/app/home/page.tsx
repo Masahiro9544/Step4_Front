@@ -7,8 +7,11 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import CharacterMessage from '@/components/home/CharacterMessage';
 import ResultSummary from '@/components/home/ResultSummary';
+import ChildSelectorModal from '@/components/auth/ChildSelector';
 import { getHomeData } from '@/lib/api';
 import { HomeResponse } from '@/types/home';
+import { useSound } from '@/hooks/useRfpSound';
+import { useAuth } from '@/context/AuthContext';
 
 const AnimatedBackground = dynamic(() => import('@/components/ui/AnimatedBackground'), {
     ssr: false,
@@ -19,17 +22,24 @@ export default function HomePage() {
     const [homeData, setHomeData] = useState<HomeResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [clickedButton, setClickedButton] = useState<string | null>(null);
-
-    // TODO: 実際のchild_idはログイン情報から取得
-    const childId = 1;
+    const { playSound } = useSound();
+    const { selectedChildId, user, loading: authLoading } = useAuth();
 
     useEffect(() => {
+        // Play welcome audio on home mount
+        playSound('mememestarrt.wav');
+
         fetchHomeData();
-    }, []);
+    }, [playSound, selectedChildId]);
 
     const fetchHomeData = async () => {
+        if (!selectedChildId) {
+            setLoading(false);
+            return;
+        }
+
         try {
-            const data = await getHomeData(childId);
+            const data = await getHomeData(selectedChildId);
             setHomeData(data);
         } catch (error) {
             console.error('ホームデータの取得エラー:', error);
@@ -49,7 +59,23 @@ export default function HomePage() {
         }
     };
 
-    if (loading) {
+    // Show loading while auth is being checked
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-bg-main flex items-center justify-center">
+                <div className="animate-bounce text-merelax-primary text-2xl font-bold">●</div>
+            </div>
+        );
+    }
+
+    // If auth is done loading but no user, redirect to login
+    if (!authLoading && !user) {
+        router.push('/');
+        return null;
+    }
+
+    // Show loading while fetching home data
+    if (loading && selectedChildId === null) {
         return (
             <div className="min-h-screen bg-bg-main flex items-center justify-center">
                 <div className="animate-bounce text-merelax-primary text-2xl font-bold">●</div>
@@ -58,21 +84,23 @@ export default function HomePage() {
     }
 
     return (
-        <div className="min-h-screen relative flex flex-col pb-24"
-             style={{
-                 background: 'linear-gradient(135deg, #E3F2FD 0%, #FFF3E0 50%, #FFF9C4 100%)',
-             }}>
+        <>
+            <ChildSelectorModal />
+            <div className="min-h-screen relative flex flex-col pb-24"
+                style={{
+                    background: 'linear-gradient(135deg, #E3F2FD 0%, #FFF3E0 50%, #FFF9C4 100%)',
+                }}>
             {/* かわいい水玉と星のオーバーレイ */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 {/* 水玉パターン */}
                 <div className="absolute inset-0 opacity-15"
-                     style={{
-                         backgroundImage: `radial-gradient(circle, #FF9EC4 12%, transparent 12%),
+                    style={{
+                        backgroundImage: `radial-gradient(circle, #FF9EC4 12%, transparent 12%),
                                           radial-gradient(circle, #00A0E9 12%, transparent 12%),
                                           radial-gradient(circle, #FFD83B 12%, transparent 12%)`,
-                         backgroundSize: '100px 100px, 140px 140px, 120px 120px',
-                         backgroundPosition: '0 0, 50px 50px, 100px 25px'
-                     }}>
+                        backgroundSize: '100px 100px, 140px 140px, 120px 120px',
+                        backgroundPosition: '0 0, 50px 50px, 100px 25px'
+                    }}>
                 </div>
                 {/* キラキラ星 */}
                 <div className="absolute top-20 left-10 text-4xl opacity-30">✨</div>
@@ -238,11 +266,11 @@ export default function HomePage() {
 
             {/* 下部ナビゲーションバー - かわいく改良 */}
             <nav className="fixed bottom-0 left-0 right-0 z-50"
-                 style={{
-                     background: 'linear-gradient(180deg, #FFFFFF 0%, #E3F2FD 100%)',
-                     borderTop: '4px solid #00A0E9',
-                     boxShadow: '0 -4px 20px rgba(0, 160, 233, 0.15)'
-                 }}>
+                style={{
+                    background: 'linear-gradient(180deg, #FFFFFF 0%, #E3F2FD 100%)',
+                    borderTop: '4px solid #00A0E9',
+                    boxShadow: '0 -4px 20px rgba(0, 160, 233, 0.15)'
+                }}>
                 <div className="max-w-md mx-auto px-4 py-3 flex justify-around items-center">
                     <motion.button
                         whileHover={{ scale: 1.05, y: -2 }}
@@ -287,6 +315,7 @@ export default function HomePage() {
                 </div>
             </nav>
         </div>
+        </>
     );
 }
 

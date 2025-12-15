@@ -64,7 +64,7 @@ export default function SignupPage() {
                         <h2 className="text-4xl font-bold text-center mb-2" style={{ color: '#00A0E9' }}>
                             新規会員登録
                         </h2>
-                        <p className="text-center text-gray-600 mb-8">めトレをはじめよう！</p>
+                        <p className="text-center text-gray-600 mb-8">めめめをはじめよう！</p>
                     </motion.div>
 
                     <form className="space-y-5" onSubmit={handleSubmit}>

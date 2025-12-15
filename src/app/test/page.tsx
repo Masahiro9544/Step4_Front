@@ -6,6 +6,7 @@ import Image from 'next/image';
 import LandoltC from '@/components/LandoltC';
 import { useVisionTest, Direction } from '@/hooks/useVisionTest';
 import { saveResult, saveEyeTest } from '@/lib/rfp-api';
+import { useAuth } from '@/context/AuthContext';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useVoiceGuidance } from '@/hooks/useVoiceGuidance';
 import { useSound } from '@/hooks/useRfpSound';
@@ -14,22 +15,40 @@ import VisionTestCharacter from '@/components/VisionTestCharacter';
 function TestContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const distance = (searchParams.get('distance') as '30cm' | '3m') || '30cm';
+    // Use state to track distance, initialized from searchParams but robust to client updates
+    const [distance, setDistance] = useState<'30cm' | '3m'>((searchParams.get('distance') as '30cm' | '3m') || '30cm');
+    const { selectedChildId } = useAuth();
+
+    // Robust check for query parameter on client-side mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const dist = params.get('distance') as '30cm' | '3m';
+            if (dist && (dist === '30cm' || dist === '3m') && dist !== distance) {
+                console.log('Updated distance from window.location:', dist);
+                setDistance(dist);
+            }
+        }
+    }, [searchParams, distance]);
 
     const { state, currentDirection, calculateSizePx, answer, startRightEye, nextTest, undo, togglePause, canUndo } = useVisionTest(distance);
     const [showResult, setShowResult] = useState(false);
     const [saved, setSaved] = useState(false);
     const [isSetup, setIsSetup] = useState(true); // Setup phase state
     const [hasStarted, setHasStarted] = useState(false); // New: Explicit user start state
+
     const { speak, voiceCount, cancel } = useVoiceGuidance();
     const { playSound, stopSound } = useSound();
 
-    // Ref to control guide sequence cancellation
+    // Ref to control guide sequence cancellation and mount status
     const stopGuideRef = useRef(false);
+    const isMounted = useRef(true);
 
     // Cleanup on unmount
     useEffect(() => {
+        isMounted.current = true;
         return () => {
+            isMounted.current = false;
             stopSound();
             cancel();
             stopGuideRef.current = true;
@@ -38,8 +57,14 @@ function TestContent() {
 
     const handleQuit = useCallback(() => {
         if (window.confirm('チェックをちゅうだんして、ホームにもどりますか？')) {
-            stopSound();
-            cancel();
+            try {
+                stopGuideRef.current = true;
+                stopSound();
+                cancel();
+            } catch (e) {
+                console.error('Error during cleanup:', e);
+            }
+            // Use router.push for SPA navigation (keeps login state)
             router.push('/');
         }
     }, [stopSound, cancel, router]);
@@ -47,14 +72,16 @@ function TestContent() {
     const startTest = useCallback(() => {
         stopGuideRef.current = true; // Stop any ongoing guide sequence
         stopSound(); // Stop any guide audio
-        setIsSetup(false);
-        nextTest();
-        speak('いくよ、あなが あいている ほうこうを おしえて！');
+
+        if (isMounted.current) {
+            setIsSetup(false);
+            nextTest();
+            // speak('いくよ、あなが あいている ほうこうを おしえて！'); // Removed TTS
+        }
     }, [nextTest, speak, stopSound]);
 
     const handleAnswer = useCallback((dir: Direction | 'start') => {
         if (dir === 'start') {
-
             if (isSetup && hasStarted) {
                 startTest();
             }
@@ -66,12 +93,11 @@ function TestContent() {
         // Feedback Logic
         const isCorrect = dir === currentDirection;
         if (isCorrect) {
-            cancel(); // Cancel previous speech to prioritize feedback? actually keep overlapping or queue? 
-            // Better to queue usually, but for "Seikai" feedback, maybe current instruction is old.
-            speak('せいかい！');
+            cancel();
+            // speak('せいかい！'); // Removed TTS
         } else {
             cancel();
-            speak('もういっかい！');
+            // speak('もういっかい！'); // Removed TTS
         }
 
         playSound('koreha.wav'); // Question the next symbol
@@ -85,42 +111,35 @@ function TestContent() {
         stopSound();
 
         setHasStarted(true);
-        cancel(); // Clear any stuck queue
+        cancel();
         startListening();
 
         // Reset cancellation ref for new session
         stopGuideRef.current = false;
 
-        // Interactive Guide Sequence
+        // Interactive Guide Sequence (Initial Start)
         const guide = async () => {
             const pause = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-            // speak('いまから しりょくチェックを かいしします');
-            // await pause(3000);
-            if (stopGuideRef.current) return;
+            if (stopGuideRef.current || !isMounted.current) return;
 
             if (distance === '30cm') {
-                // speak('がめんから 30センチ はなれよう');
                 playSound('shiryoku30cm.wav');
             } else {
-                // speak('がめんから 3メートル はなれよう');
                 playSound('shiryoku3m.wav');
             }
-            await pause(5000); // Wait for distance voice (approx 5-7s -> 5s)
+            await pause(12000); // Wait for distance voice (approx 11s)
 
+            if (stopGuideRef.current || !isMounted.current) return;
 
-
-            if (stopGuideRef.current) return;
-
-            stopSound(); // Ensure previous sound is stopped explicitly
+            // Restored migimekarahidarime.wav here
             console.log('Playing migimekarahidarime.wav');
             playSound('migimekarahidarime.wav');
-            await pause(6000); // Wait for eye instruction
+            await pause(6000); // Wait for eye instruction (approx 5s)
 
-            // speak('ともだちや おとなのひとに かくしてもらってね');
-            // await pause(4000);
+            if (stopGuideRef.current || !isMounted.current) return;
 
-            speak('じゅんびができたら、はじめます。オーケー、といってください');
+            // speak('じゅんびができたら、はじめます。オーケー、といってください'); // Removed TTS
         };
 
         guide();
@@ -130,11 +149,11 @@ function TestContent() {
 
     // Voice Guidance Updates for Left First
     useEffect(() => {
-        if (state.isFinished) {
+        if (state.isFinished && isMounted.current) {
             if (state.eye === 'left') {
-                speak('つぎは ひだりめを かくしてね');
+                // speak('つぎは ひだりめを かくしてね'); // Removed TTS
             } else {
-                speak('おつかれさま！');
+                // speak('おつかれさま！'); // Removed TTS
             }
         }
     }, [state.isFinished, state.eye, speak]);
@@ -145,17 +164,8 @@ function TestContent() {
         }
         // Start Right Eye
         startRightEye();
-        // Prompt for next eye start? 
-        // Logic will mount new test but isSetup=false, so it goes straight to test.
-        // We might want to PAUSE or show interstitial?
-        // The current current page logic handles interstitial screen at line ~156
-        // The interstitial screen has a button "みぎめを はじめる" (Start Right Eye).
-        // That button calls handleNextEye.
-        // So we should speak "Here we go" again?
-        // Let's add speak to handleNextEye or the startRightEye effect?
-        // Actually, handleNextEye calls startRightEye which resets state.
-        // Maybe add speak here:
-        speak('いくよ、あなが あいている ほうこうを おしえて！');
+
+        // speak('いくよ、あなが あいている ほうこうを おしえて！'); // Removed TTS
     };
 
     const handleFinish = async () => {
@@ -168,7 +178,13 @@ function TestContent() {
         }
 
         // Save accumulated results
-        await saveEyeTest(finalLeft, finalRightResult ?? undefined, distance);
+        if (selectedChildId) {
+            await saveEyeTest(selectedChildId, finalLeft, finalRightResult ?? undefined, distance);
+        } else {
+            console.error("No child selected");
+            // Fallback or early return? For MVP, maybe fallback to 1 or alert
+            await saveEyeTest(1, finalLeft, finalRightResult ?? undefined, distance);
+        }
 
         setSaved(true);
         setShowResult(true);
@@ -240,7 +256,7 @@ function TestContent() {
 
                     <button
                         onClick={() => {
-                            router.push('/');
+                            router.push('/home');
                         }}
                         className="w-full py-4 bg-[#0093D0] hover:bg-[#007bb5] text-white rounded-2xl font-bold text-xl shadow-md transition-transform active:scale-95"
                     >

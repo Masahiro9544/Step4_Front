@@ -7,9 +7,11 @@ import { Settings, Child, ChildCreate, ChildUpdate } from '@/types/settings';
 import ChildSelector from '@/components/settings/ChildSelector';
 import SettingsToggle from '@/components/settings/SettingsToggle';
 import ChildForm from '@/components/settings/ChildForm';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SettingsPage() {
     const router = useRouter();
+    const { user, logout, selectChild } = useAuth();
     const [settings, setSettings] = useState<Settings | null>(null);
     const [childrenList, setChildrenList] = useState<Child[]>([]);
     const [loading, setLoading] = useState(true);
@@ -18,58 +20,61 @@ export default function SettingsPage() {
     const [showChildForm, setShowChildForm] = useState(false);
     const [isEditingChild, setIsEditingChild] = useState(false);
 
-    // Mock Parent ID for prototype
-    const PARENT_ID = 1;
     const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`;
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (user?.parent_id) {
+            fetchData();
+        }
+    }, [user]);
 
     const fetchData = async () => {
+        if (!user?.parent_id) return;
+
         setLoading(true);
         try {
             // 1. Fetch Settings
-            const settingsRes = await fetch(`${API_BASE}/settings/${PARENT_ID}`);
+            const settingsRes = await fetch(`${API_BASE}/settings/${user.parent_id}`);
             if (settingsRes.ok) {
                 setSettings(await settingsRes.json());
             }
 
             // 2. Fetch Children
-            const childrenRes = await fetch(`${API_BASE}/child/all/${PARENT_ID}`);
+            const childrenRes = await fetch(`${API_BASE}/child/all/${user.parent_id}`);
             if (childrenRes.ok) {
                 setChildrenList(await childrenRes.json());
             }
 
         } catch (e) {
             console.error("Failed to fetch settings data", e);
-            // Alert?
         } finally {
             setLoading(false);
         }
     };
 
     const handleChildSelect = async (childId: number) => {
-        if (!settings) return;
+        if (!settings || !user?.parent_id) return;
         try {
-            const res = await fetch(`${API_BASE}/settings/${PARENT_ID}`, {
+            const res = await fetch(`${API_BASE}/settings/${user.parent_id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ child_id: childId })
             });
             if (res.ok) {
                 setSettings(await res.json());
+                // Update AuthContext as well
+                selectChild(childId);
             }
         } catch (e) { console.error(e); }
     };
 
     const handleVoiceToggle = async (enabled: boolean) => {
-        if (!settings) return;
+        if (!settings || !user?.parent_id) return;
         // Optimistic update
         setSettings({ ...settings, voice_enabled: enabled });
 
         try {
-            await fetch(`${API_BASE}/settings/${PARENT_ID}`, {
+            await fetch(`${API_BASE}/settings/${user.parent_id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ voice_enabled: enabled })
@@ -157,12 +162,15 @@ export default function SettingsPage() {
                             </div>
                         </div>
                     ) : (
-                        <ChildForm
-                            isEditing={isEditingChild}
-                            initialData={isEditingChild ? childrenList.find(c => c.child_id === settings?.child_id) : undefined}
-                            onSubmit={handleChildSubmit}
-                            onCancel={() => setShowChildForm(false)}
-                        />
+                        user?.parent_id && (
+                            <ChildForm
+                                isEditing={isEditingChild}
+                                initialData={isEditingChild ? childrenList.find(c => c.child_id === settings?.child_id) : undefined}
+                                onSubmit={handleChildSubmit}
+                                onCancel={() => setShowChildForm(false)}
+                                parentId={user.parent_id}
+                            />
+                        )
                     )}
                 </section>
 
@@ -180,12 +188,24 @@ export default function SettingsPage() {
                 </section>
 
                 {/* Save/Confirm Button (Actually saving happens immediately on change but user likes confirmation button) */}
-                <div className="pt-8">
+                <div className="pt-8 space-y-3">
                     <button
                         onClick={handleBack}
                         className="w-full py-4 bg-merelax-primary text-white text-lg font-bold rounded-2xl shadow-lg hover:bg-blue-600 active:scale-95 transition-all"
                     >
                         💾 けってい
+                    </button>
+
+                    {/* Logout Button */}
+                    <button
+                        onClick={() => {
+                            if (confirm('ログアウトしますか？')) {
+                                logout();
+                            }
+                        }}
+                        className="w-full py-4 bg-white border-2 border-red-300 text-red-600 text-lg font-bold rounded-2xl hover:bg-red-50 active:scale-95 transition-all"
+                    >
+                        🚪 ログアウト
                     </button>
                 </div>
 

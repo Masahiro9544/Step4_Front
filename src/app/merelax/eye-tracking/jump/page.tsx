@@ -7,6 +7,7 @@ import { logExercise } from '@/lib/api';
 import SoundToggle from '@/components/merelax/SoundToggle';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useSound } from '@/hooks/useSound';
+import { useAuth } from '@/context/AuthContext';
 
 export default function JumpPage() {
     const router = useRouter();
@@ -17,9 +18,7 @@ export default function JumpPage() {
     const [showCharacter, setShowCharacter] = useState(false);
     const { playSuccessSound, playSound } = useSound();
     const { speak } = useTextToSpeech();
-
-    // TODO: 実際のchild_idはログイン情報から取得
-    const childId = 1;
+    const { selectedChildId } = useAuth();
 
     // ゲームループ
     useEffect(() => {
@@ -71,13 +70,15 @@ export default function JumpPage() {
     }, [isStarted, isCompleted]);
 
     const handleComplete = async () => {
+        if (!selectedChildId) return;
+
         try {
             playSuccessSound();
             playSound('/sounds/owarimerelax.wav');
             speak("よく みつけたね！");
 
             const today = new Date().toISOString().split('T')[0];
-            await logExercise(childId, {
+            await logExercise(selectedChildId, {
                 exercise_id: 5,
                 exercise_date: today,
             });

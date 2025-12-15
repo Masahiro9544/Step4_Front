@@ -16,6 +16,7 @@ import Footer from '@/components/Footer';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useBGM } from '@/hooks/useBGM';
 import { useSound } from '@/hooks/useSound';
+import { useAuth } from '@/context/AuthContext';
 
 const AnimatedBackground = dynamic(() => import('@/components/ui/AnimatedBackground'), {
     ssr: false,
@@ -29,9 +30,7 @@ export default function MerelaxPage() {
     const { speak } = useTextToSpeech();
     const { playBGM, stopBGM } = useBGM();
     const { soundEnabled, playSound } = useSound();
-
-    // TODO: 実際のchild_idはログイン情報から取得
-    const childId = 1;
+    const { selectedChildId } = useAuth();
 
     useEffect(() => {
         fetchStats();
@@ -62,8 +61,13 @@ export default function MerelaxPage() {
     }, [soundEnabled, loading, playBGM, stopBGM, speak]);
 
     const fetchStats = async () => {
+        if (!selectedChildId) {
+            setLoading(false);
+            return;
+        }
+
         try {
-            const data = await getExerciseStats(childId);
+            const data = await getExerciseStats(selectedChildId);
             setStats(data);
         } catch (error) {
             console.error('統計情報の取得エラー:', error);

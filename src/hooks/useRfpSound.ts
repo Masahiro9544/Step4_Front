@@ -30,9 +30,11 @@ export const useSound = () => {
             playPromise.then(() => {
                 console.log(`Successfully started playing: ${url}`);
             }).catch(error => {
-                console.error(`Error playing sound (${url}):`, error);
                 if (error.name === 'NotAllowedError' || error.name === 'AbortError') {
+                    // Benign errors: Autoplay blocked or interrupted by stop()
                     // console.log('Audio playback was prevented or interrupted:', error);
+                } else {
+                    console.error(`Error playing sound (${url}):`, error);
                 }
             });
         }

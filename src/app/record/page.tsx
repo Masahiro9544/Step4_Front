@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Footer from '@/components/Footer';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useAuth } from '@/context/AuthContext';
 
 // ダッシュボード用の型定義
 interface Child {
@@ -34,19 +36,20 @@ interface ScreenTimeDataPoint {
 }
 
 interface ScreenTimeData {
-    view: 'daily' | 'weekly';
+    view: 'weekly' | 'monthly';
     data: ScreenTimeDataPoint[];
 }
 
 export default function DashboardPage() {
     const router = useRouter();
+    const { user, selectedChildId } = useAuth();
     const [children, setChildren] = useState<Child[]>([]);
     const [selectedChild, setSelectedChild] = useState<number | null>(null);
     const [visionData, setVisionData] = useState<VisionData[]>([]);
     const [distanceData, setDistanceData] = useState<DistanceData | null>(null);
     const [screenTimeData, setScreenTimeData] = useState<ScreenTimeData | null>(null);
-    const [visionPeriod, setVisionPeriod] = useState<'3months' | '1year'>('3months');
-    const [screenTimeView, setScreenTimeView] = useState<'daily' | 'weekly'>('daily');
+    const [visionPeriod, setVisionPeriod] = useState<'weekly' | 'monthly'>('weekly');
+    const [screenTimeView, setScreenTimeView] = useState<'weekly' | 'monthly'>('weekly');
     const [loading, setLoading] = useState(true);
 
     const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/v1`;
@@ -64,9 +67,10 @@ export default function DashboardPage() {
     }, [selectedChild, visionPeriod, screenTimeView]);
 
     const fetchChildren = async () => {
+        if (!user) return;
+
         try {
-            // Hardcoded parent_id=1 for demo purposes as requested
-            const parentId = 1;
+            const parentId = user.parent_id;
             const res = await fetch(`${API_BASE}/dashboard/parent/${parentId}`);
             if (res.ok) {
                 const data = await res.json();
@@ -97,7 +101,7 @@ export default function DashboardPage() {
         if (!selectedChild) return;
 
         try {
-            const res = await fetch(`${API_BASE}/dashboard/child/${selectedChild}`);
+            const res = await fetch(`${API_BASE}/dashboard/child/${selectedChild}`, { cache: 'no-store' });
             if (res.ok) {
                 const data = await res.json();
 
@@ -107,10 +111,10 @@ export default function DashboardPage() {
                     // Backend: { check_date: string, left_eye: string, right_eye: string, test_distance_cm: int }
                     const mappedVisionData: VisionData[] = data.recent_eye_tests.map((test: any) => ({
                         test_date: test.check_date,
-                        right_30cm: null, // Specific mapping might be needed if recorded differently
-                        left_30cm: null,
-                        right_3m: parseFloat(test.right_eye) || null, // Assuming standard distance recording
-                        left_3m: parseFloat(test.left_eye) || null
+                        right_30cm: test.test_distance_cm === 30 ? parseFloat(test.right_eye) || null : null,
+                        left_30cm: test.test_distance_cm === 30 ? parseFloat(test.left_eye) || null : null,
+                        right_3m: test.test_distance_cm === 300 ? parseFloat(test.right_eye) || null : null,
+                        left_3m: test.test_distance_cm === 300 ? parseFloat(test.left_eye) || null : null
                     }));
                     setVisionData(mappedVisionData);
                 } else {
@@ -133,19 +137,31 @@ export default function DashboardPage() {
                     });
                 }
 
-                // 3. Screen Time
+                // 3. Screen Time - Aggregate by date
                 if (data.recent_screentime && data.recent_screentime.length > 0) {
-                    // Map backend ScreenTime to frontend structure
-                    // Backend: { start_time: datetime, total_minutes: int }
-                    const mappedScreenTime: ScreenTimeDataPoint[] = data.recent_screentime.map((st: any) => {
+                    // Group by date and sum total_minutes
+                    const dailyTotals: { [key: string]: number } = {};
+
+                    data.recent_screentime.forEach((st: any) => {
+                        const dateKey = new Date(st.start_time).toISOString().split('T')[0]; // YYYY-MM-DD
                         const mins = st.total_minutes || 0;
+
+                        if (dailyTotals[dateKey]) {
+                            dailyTotals[dateKey] += mins;
+                        } else {
+                            dailyTotals[dateKey] = mins;
+                        }
+                    });
+
+                    // Convert to array with status
+                    const mappedScreenTime: ScreenTimeDataPoint[] = Object.entries(dailyTotals).map(([dateKey, totalMins]) => {
                         let status: 'appropriate' | 'moderate' | 'too_long' = 'appropriate';
-                        if (mins > 120) status = 'too_long';
-                        else if (mins > 60) status = 'moderate';
+                        if (totalMins > 120) status = 'too_long';
+                        else if (totalMins > 60) status = 'moderate';
 
                         return {
-                            date: st.start_time,
-                            total_minutes: mins,
+                            date: dateKey,
+                            total_minutes: totalMins,
                             status: status
                         };
                     });
@@ -264,35 +280,145 @@ export default function DashboardPage() {
                         <h2 className="text-xl font-bold" style={{ color: '#00A0E9' }}>👁️ 視力チェック結果の推移</h2>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setVisionPeriod('3months')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${visionPeriod === '3months'
+                                onClick={() => setVisionPeriod('weekly')}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all ${visionPeriod === 'weekly'
                                     ? 'text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
-                                style={visionPeriod === '3months' ? { backgroundColor: '#00A0E9' } : {}}
+                                style={visionPeriod === 'weekly' ? { backgroundColor: '#00A0E9' } : {}}
                             >
-                                3ヶ月
+                                週別
                             </button>
                             <button
-                                onClick={() => setVisionPeriod('1year')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${visionPeriod === '1year'
+                                onClick={() => setVisionPeriod('monthly')}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all ${visionPeriod === 'monthly'
                                     ? 'text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
-                                style={visionPeriod === '1year' ? { backgroundColor: '#00A0E9' } : {}}
+                                style={visionPeriod === 'monthly' ? { backgroundColor: '#00A0E9' } : {}}
                             >
-                                1年
+                                月別
                             </button>
                         </div>
                     </div>
-                    <div className="h-64 flex items-center justify-center text-gray-400">
+                    <div className="h-64">
                         {visionData.length === 0 ? (
-                            <div className="text-center">
-                                <p className="text-lg mb-2">まだデータがありません</p>
-                                <p className="text-sm">視力チェックを始めましょう!</p>
+                            <div className="flex items-center justify-center h-full text-center text-gray-400">
+                                <div>
+                                    <p className="text-lg mb-2">まだデータがありません</p>
+                                    <p className="text-sm">視力チェックを始めましょう!</p>
+                                </div>
                             </div>
                         ) : (
-                            <p>グラフ表示エリア（Chart.js等で実装予定）</p>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart
+                                    data={(() => {
+                                        const now = new Date();
+                                        const daysToShow = visionPeriod === 'weekly' ? 7 : 30;
+                                        const startDate = new Date(now);
+                                        startDate.setDate(now.getDate() - (daysToShow - 1));
+
+                                        // グループ化: 同じ日付のデータを1つのオブジェクトにまとめる
+                                        const groupedData: { [key: string]: any } = {};
+
+                                        visionData
+                                            .slice() // Create a copy
+                                            .reverse() // Process Oldest -> Newest so Newest wins
+                                            .filter(item => new Date(item.test_date) >= startDate)
+                                            .forEach((item) => {
+                                                const dateKey = new Date(item.test_date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' });
+
+                                                if (!groupedData[dateKey]) {
+                                                    groupedData[dateKey] = {
+                                                        date: dateKey,
+                                                        右目30cm: null,
+                                                        左目30cm: null,
+                                                        右目3m: null,
+                                                        左目3m: null
+                                                    };
+                                                }
+
+                                                // データを距離別に分ける
+                                                if (item.right_30cm !== null) groupedData[dateKey].右目30cm = item.right_30cm;
+                                                if (item.left_30cm !== null) groupedData[dateKey].左目30cm = item.left_30cm;
+                                                if (item.right_3m !== null) groupedData[dateKey].右目3m = item.right_3m;
+                                                if (item.left_3m !== null) groupedData[dateKey].左目3m = item.left_3m;
+                                            });
+
+                                        return Object.values(groupedData)
+                                            .sort((a, b) => {
+                                                const dateA = a.date.split('/').map((n: string) => parseInt(n));
+                                                const dateB = b.date.split('/').map((n: string) => parseInt(n));
+                                                if (dateA[0] !== dateB[0]) return dateA[0] - dateB[0];
+                                                return dateA[1] - dateB[1];
+                                            });
+                                    })()}
+                                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                                    <XAxis
+                                        dataKey="date"
+                                        tick={{ fontSize: 12 }}
+                                        stroke="#6B7280"
+                                    />
+                                    <YAxis
+                                        domain={[0, 2.0]}
+                                        ticks={[0, 0.5, 1.0, 1.5, 2.0]}
+                                        tick={{ fontSize: 12 }}
+                                        stroke="#6B7280"
+                                        label={{ value: '視力', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'white',
+                                            border: '1px solid #E5E7EB',
+                                            borderRadius: '8px',
+                                            fontSize: '12px'
+                                        }}
+                                        formatter={(value: number) => {
+                                            if (value <= 0.1) return ['0.5未満', ''];
+                                            return [value, ''];
+                                        }}
+                                    />
+                                    <Legend
+                                        wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                                    />
+                                    <Line
+                                        type="linear"
+                                        dataKey="右目30cm"
+                                        stroke="#FF6B6B"
+                                        strokeWidth={2}
+                                        dot={{ fill: '#FF6B6B', r: 4 }}
+                                        activeDot={{ r: 6 }}
+                                        strokeDasharray="5 5"
+                                    />
+                                    <Line
+                                        type="linear"
+                                        dataKey="左目30cm"
+                                        stroke="#4ECDC4"
+                                        strokeWidth={2}
+                                        dot={{ fill: '#4ECDC4', r: 4 }}
+                                        activeDot={{ r: 6 }}
+                                        strokeDasharray="5 5"
+                                    />
+                                    <Line
+                                        type="linear"
+                                        dataKey="右目3m"
+                                        stroke="#FF6B6B"
+                                        strokeWidth={2}
+                                        dot={{ fill: '#FF6B6B', r: 4 }}
+                                        activeDot={{ r: 6 }}
+                                    />
+                                    <Line
+                                        type="linear"
+                                        dataKey="左目3m"
+                                        stroke="#4ECDC4"
+                                        strokeWidth={2}
+                                        dot={{ fill: '#4ECDC4', r: 4 }}
+                                        activeDot={{ r: 6 }}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
                         )}
                     </div>
                 </motion.div>
@@ -342,16 +468,6 @@ export default function DashboardPage() {
                         <h2 className="text-xl font-bold" style={{ color: '#00A0E9' }}>⏱️ スマホ使用時間</h2>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setScreenTimeView('daily')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${screenTimeView === 'daily'
-                                    ? 'text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
-                                style={screenTimeView === 'daily' ? { backgroundColor: '#00A0E9' } : {}}
-                            >
-                                日別
-                            </button>
-                            <button
                                 onClick={() => setScreenTimeView('weekly')}
                                 className={`px-4 py-2 rounded-lg font-bold transition-all ${screenTimeView === 'weekly'
                                     ? 'text-white'
@@ -361,16 +477,94 @@ export default function DashboardPage() {
                             >
                                 週別
                             </button>
+                            <button
+                                onClick={() => setScreenTimeView('monthly')}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all ${screenTimeView === 'monthly'
+                                    ? 'text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                style={screenTimeView === 'monthly' ? { backgroundColor: '#00A0E9' } : {}}
+                            >
+                                月別
+                            </button>
                         </div>
                     </div>
-                    <div className="h-64 flex items-center justify-center text-gray-400">
+                    <div className="h-64">
                         {screenTimeData?.data.length === 0 ? (
-                            <div className="text-center">
-                                <p className="text-lg mb-2">まだデータがありません</p>
-                                <p className="text-sm">スマホタイマーを使ってみましょう!</p>
+                            <div className="flex items-center justify-center h-full text-center text-gray-400">
+                                <div>
+                                    <p className="text-lg mb-2">まだデータがありません</p>
+                                    <p className="text-sm">スマホタイマーを使ってみましょう!</p>
+                                </div>
                             </div>
                         ) : (
-                            <p>グラフ表示エリア（Chart.js等で実装予定）</p>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart
+                                    data={(() => {
+                                        const now = new Date();
+                                        const daysToShow = screenTimeView === 'weekly' ? 7 : 30;
+                                        const startDate = new Date(now);
+                                        startDate.setDate(now.getDate() - (daysToShow - 1));
+
+                                        return screenTimeData?.data
+                                            .filter(item => new Date(item.date) >= startDate)
+                                            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                                            .map((item) => ({
+                                                date: new Date(item.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }),
+                                                使用時間: item.total_minutes,
+                                                status: item.status,
+                                            })) || [];
+                                    })()}
+                                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                                    <XAxis
+                                        dataKey="date"
+                                        tick={{ fontSize: 12 }}
+                                        stroke="#6B7280"
+                                    />
+                                    <YAxis
+                                        domain={[0, 'auto']}
+                                        tick={{ fontSize: 12 }}
+                                        stroke="#6B7280"
+                                        label={{ value: '分', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'white',
+                                            border: '1px solid #E5E7EB',
+                                            borderRadius: '8px',
+                                            fontSize: '12px'
+                                        }}
+                                        formatter={(value: any) => [`${value}分`, '使用時間']}
+                                    />
+                                    <Legend
+                                        wrapperStyle={{ fontSize: '14px', paddingTop: '10px' }}
+                                    />
+                                    <Bar
+                                        dataKey="使用時間"
+                                        radius={[8, 8, 0, 0]}
+                                        fill="#00A0E9"
+                                        shape={(props: any) => {
+                                            const { x, y, width, height, payload } = props;
+                                            let fillColor = '#4CAF50'; // appropriate
+                                            if (payload.status === 'moderate') fillColor = '#FFD83B';
+                                            if (payload.status === 'too_long') fillColor = '#FF6B6B';
+                                            return (
+                                                <rect
+                                                    x={x}
+                                                    y={y}
+                                                    width={width}
+                                                    height={height}
+                                                    fill={fillColor}
+                                                    rx={8}
+                                                    ry={8}
+                                                />
+                                            );
+                                        }}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
                         )}
                     </div>
                 </motion.div>
