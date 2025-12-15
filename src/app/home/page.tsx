@@ -172,7 +172,9 @@ export default function HomePage() {
                                 color: '#FFFFFF',
                             }}
                         >
-                            <div className="text-6xl mb-2 drop-shadow-md">📏</div>
+                            <div className="relative w-16 h-16 mb-2">
+                                <Image src="/images/icon/ruler.png" alt="きょり" fill className="object-contain drop-shadow-md" />
+                            </div>
                             <div className="text-2xl font-extrabold tracking-wide">きょり</div>
                         </motion.button>
 
@@ -191,7 +193,9 @@ export default function HomePage() {
                                 color: '#333333',
                             }}
                         >
-                            <div className="text-6xl mb-2 drop-shadow-md">⏱️</div>
+                            <div className="relative w-16 h-16 mb-2">
+                                <Image src="/images/icon/clock.png" alt="タイマー" fill className="object-contain drop-shadow-md" />
+                            </div>
                             <div className="text-2xl font-extrabold tracking-wide">タイマー</div>
                         </motion.button>
 
@@ -210,7 +214,9 @@ export default function HomePage() {
                                 color: '#FFFFFF',
                             }}
                         >
-                            <div className="text-6xl mb-2 drop-shadow-md">👁️</div>
+                            <div className="relative w-16 h-16 mb-2">
+                                <Image src="/images/icon/search.png" alt="しりょく" fill className="object-contain drop-shadow-md" />
+                            </div>
                             <div className="text-2xl font-extrabold tracking-wide">しりょく</div>
                         </motion.button>
                     </div>
