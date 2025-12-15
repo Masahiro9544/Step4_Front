@@ -321,6 +321,8 @@ export default function DashboardPage() {
                                         const groupedData: { [key: string]: any } = {};
 
                                         visionData
+                                            .slice() // Create a copy
+                                            .reverse() // Process Oldest -> Newest so Newest wins
                                             .filter(item => new Date(item.test_date) >= startDate)
                                             .forEach((item) => {
                                                 const dateKey = new Date(item.test_date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' });

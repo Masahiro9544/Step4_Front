@@ -6,6 +6,7 @@ import Image from 'next/image';
 import LandoltC from '@/components/LandoltC';
 import { useVisionTest, Direction } from '@/hooks/useVisionTest';
 import { saveResult, saveEyeTest } from '@/lib/rfp-api';
+import { useAuth } from '@/context/AuthContext';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useVoiceGuidance } from '@/hooks/useVoiceGuidance';
 import { useSound } from '@/hooks/useRfpSound';
@@ -14,7 +15,21 @@ import VisionTestCharacter from '@/components/VisionTestCharacter';
 function TestContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const distance = (searchParams.get('distance') as '30cm' | '3m') || '30cm';
+    // Use state to track distance, initialized from searchParams but robust to client updates
+    const [distance, setDistance] = useState<'30cm' | '3m'>((searchParams.get('distance') as '30cm' | '3m') || '30cm');
+    const { selectedChildId } = useAuth();
+
+    // Robust check for query parameter on client-side mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const dist = params.get('distance') as '30cm' | '3m';
+            if (dist && (dist === '30cm' || dist === '3m') && dist !== distance) {
+                console.log('Updated distance from window.location:', dist);
+                setDistance(dist);
+            }
+        }
+    }, [searchParams, distance]);
 
     const { state, currentDirection, calculateSizePx, answer, startRightEye, nextTest, undo, togglePause, canUndo } = useVisionTest(distance);
     const [showResult, setShowResult] = useState(false);
@@ -163,7 +178,13 @@ function TestContent() {
         }
 
         // Save accumulated results
-        await saveEyeTest(finalLeft, finalRightResult ?? undefined, distance);
+        if (selectedChildId) {
+            await saveEyeTest(selectedChildId, finalLeft, finalRightResult ?? undefined, distance);
+        } else {
+            console.error("No child selected");
+            // Fallback or early return? For MVP, maybe fallback to 1 or alert
+            await saveEyeTest(1, finalLeft, finalRightResult ?? undefined, distance);
+        }
 
         setSaved(true);
         setShowResult(true);
