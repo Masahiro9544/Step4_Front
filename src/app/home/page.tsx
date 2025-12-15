@@ -102,7 +102,7 @@ export default function HomePage() {
                         </h1>
                     </div>
                     <p className="text-center text-sm font-bold mt-2" style={{ color: '#FF9EC4' }}>
-                        〜めのけんこうをまもろう〜
+                        〜めをたいせつにしよう！〜
                     </p>
                     <motion.button
                         whileHover={{ rotate: 90, scale: 1.1 }}
