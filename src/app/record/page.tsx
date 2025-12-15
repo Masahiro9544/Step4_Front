@@ -107,10 +107,10 @@ export default function DashboardPage() {
                     // Backend: { check_date: string, left_eye: string, right_eye: string, test_distance_cm: int }
                     const mappedVisionData: VisionData[] = data.recent_eye_tests.map((test: any) => ({
                         test_date: test.check_date,
-                        right_30cm: null, // Specific mapping might be needed if recorded differently
-                        left_30cm: null,
-                        right_3m: parseFloat(test.right_eye) || null, // Assuming standard distance recording
-                        left_3m: parseFloat(test.left_eye) || null
+                        right_30cm: test.test_distance_cm === 30 ? parseFloat(test.right_eye) || null : null,
+                        left_30cm: test.test_distance_cm === 30 ? parseFloat(test.left_eye) || null : null,
+                        right_3m: test.test_distance_cm === 300 ? parseFloat(test.right_eye) || null : null,
+                        left_3m: test.test_distance_cm === 300 ? parseFloat(test.left_eye) || null : null
                     }));
                     setVisionData(mappedVisionData);
                 } else {
@@ -312,16 +312,40 @@ export default function DashboardPage() {
                                         const now = new Date();
                                         const daysToShow = visionPeriod === 'weekly' ? 7 : 30;
                                         const startDate = new Date(now);
-                                        startDate.setDate(now.getDate() - daysToShow);
+                                        startDate.setDate(now.getDate() - (daysToShow - 1));
 
-                                        return visionData
+                                        // グループ化: 同じ日付のデータを1つのオブジェクトにまとめる
+                                        const groupedData: { [key: string]: any } = {};
+
+                                        visionData
                                             .filter(item => new Date(item.test_date) >= startDate)
-                                            .sort((a, b) => new Date(a.test_date).getTime() - new Date(b.test_date).getTime())
-                                            .map((item) => ({
-                                                date: new Date(item.test_date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }),
-                                                右目: item.right_3m,
-                                                左目: item.left_3m,
-                                            }));
+                                            .forEach((item) => {
+                                                const dateKey = new Date(item.test_date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' });
+
+                                                if (!groupedData[dateKey]) {
+                                                    groupedData[dateKey] = {
+                                                        date: dateKey,
+                                                        右目30cm: null,
+                                                        左目30cm: null,
+                                                        右目3m: null,
+                                                        左目3m: null
+                                                    };
+                                                }
+
+                                                // データを距離別に分ける
+                                                if (item.right_30cm !== null) groupedData[dateKey].右目30cm = item.right_30cm;
+                                                if (item.left_30cm !== null) groupedData[dateKey].左目30cm = item.left_30cm;
+                                                if (item.right_3m !== null) groupedData[dateKey].右目3m = item.right_3m;
+                                                if (item.left_3m !== null) groupedData[dateKey].左目3m = item.left_3m;
+                                            });
+
+                                        return Object.values(groupedData)
+                                            .sort((a, b) => {
+                                                const dateA = a.date.split('/').map((n: string) => parseInt(n));
+                                                const dateB = b.date.split('/').map((n: string) => parseInt(n));
+                                                if (dateA[0] !== dateB[0]) return dateA[0] - dateB[0];
+                                                return dateA[1] - dateB[1];
+                                            });
                                     })()}
                                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                                 >
@@ -347,11 +371,29 @@ export default function DashboardPage() {
                                         }}
                                     />
                                     <Legend
-                                        wrapperStyle={{ fontSize: '14px', paddingTop: '10px' }}
+                                        wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
                                     />
                                     <Line
                                         type="linear"
-                                        dataKey="右目"
+                                        dataKey="右目30cm"
+                                        stroke="#FF6B6B"
+                                        strokeWidth={2}
+                                        dot={{ fill: '#FF6B6B', r: 4 }}
+                                        activeDot={{ r: 6 }}
+                                        strokeDasharray="5 5"
+                                    />
+                                    <Line
+                                        type="linear"
+                                        dataKey="左目30cm"
+                                        stroke="#4ECDC4"
+                                        strokeWidth={2}
+                                        dot={{ fill: '#4ECDC4', r: 4 }}
+                                        activeDot={{ r: 6 }}
+                                        strokeDasharray="5 5"
+                                    />
+                                    <Line
+                                        type="linear"
+                                        dataKey="右目3m"
                                         stroke="#FF6B6B"
                                         strokeWidth={2}
                                         dot={{ fill: '#FF6B6B', r: 4 }}
@@ -359,7 +401,7 @@ export default function DashboardPage() {
                                     />
                                     <Line
                                         type="linear"
-                                        dataKey="左目"
+                                        dataKey="左目3m"
                                         stroke="#4ECDC4"
                                         strokeWidth={2}
                                         dot={{ fill: '#4ECDC4', r: 4 }}
@@ -452,7 +494,7 @@ export default function DashboardPage() {
                                         const now = new Date();
                                         const daysToShow = screenTimeView === 'weekly' ? 7 : 30;
                                         const startDate = new Date(now);
-                                        startDate.setDate(now.getDate() - daysToShow);
+                                        startDate.setDate(now.getDate() - (daysToShow - 1));
 
                                         return screenTimeData?.data
                                             .filter(item => new Date(item.date) >= startDate)
