@@ -33,12 +33,16 @@ export default function SettingsPage() {
 
         setLoading(true);
         try {
-            // 1. Fetch Settings
-            const { data: settingsData } = await api.get(`/settings/${user.parent_id}`);
+            // 1. Fetch Settings - Override baseURL to hit /api instead of /api/v1
+            const { data: settingsData } = await api.get(`/settings/${user.parent_id}`, {
+                baseURL: `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`
+            });
             setSettings(settingsData);
 
             // 2. Fetch Children
-            const { data: childrenData } = await api.get(`/child/all/${user.parent_id}`);
+            const { data: childrenData } = await api.get(`/child/all/${user.parent_id}`, {
+                baseURL: `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`
+            });
             setChildrenList(childrenData);
 
         } catch (e) {
@@ -62,7 +66,9 @@ export default function SettingsPage() {
         setSettings({ ...settings, voice_enabled: enabled });
 
         try {
-            await api.put(`/settings/${user.parent_id}`, { voice_enabled: enabled });
+            await api.put(`/settings/${user.parent_id}`, { voice_enabled: enabled }, {
+                baseURL: `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`
+            });
             // No need to setSettings from response if optimistic update worked, but safer to do so or ignore
         } catch (e) {
             // Revert on error
@@ -76,10 +82,14 @@ export default function SettingsPage() {
             let res;
             if (isEditingChild && settings?.child_id) {
                 // Update
-                res = await api.put(`/child/${settings.child_id}`, data);
+                res = await api.put(`/child/${settings.child_id}`, data, {
+                    baseURL: `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`
+                });
             } else {
                 // Create
-                res = await api.post('/child/add', data);
+                res = await api.post('/child/add', data, {
+                    baseURL: `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`
+                });
             }
 
             if (res.status === 200) {
