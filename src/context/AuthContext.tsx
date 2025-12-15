@@ -60,21 +60,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const { data } = await api.get('/auth/children', config);
             setChildrenList(data.children);
 
-            // Load selected child from localStorage first
-            const savedChildId = localStorage.getItem('selectedChildId');
-
             // If only one child, auto-select
             if (data.children.length === 1) {
                 selectChild(data.children[0].child_id);
                 return data.children[0].child_id;
-            } else if (savedChildId) {
-                // Verify saved child is still valid
-                const savedChildExists = data.children.some((child: Child) => child.child_id === Number(savedChildId));
-                if (savedChildExists) {
-                    setSelectedChildId(Number(savedChildId));
-                    return Number(savedChildId);
-                }
             }
+            // Removed localStorage auto-restore to ensure ChildSelectorModal appears on login
+            return null;
             return null;
         } catch (error) {
             console.error("Failed to fetch children", error);
