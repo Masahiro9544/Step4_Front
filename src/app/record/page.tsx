@@ -374,6 +374,10 @@ export default function DashboardPage() {
                                             borderRadius: '8px',
                                             fontSize: '12px'
                                         }}
+                                        formatter={(value: number) => {
+                                            if (value <= 0.1) return ['0.5未満', ''];
+                                            return [value, ''];
+                                        }}
                                     />
                                     <Legend
                                         wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
