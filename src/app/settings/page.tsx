@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Settings, Child, ChildCreate, ChildUpdate } from '@/types/settings';
+import { Settings, Child, ChildCreate, ChildUpdate } from '../../types/settings';
 import ChildSelector from '@/components/settings/ChildSelector';
 import SettingsToggle from '@/components/settings/SettingsToggle';
 import ChildForm from '@/components/settings/ChildForm';
