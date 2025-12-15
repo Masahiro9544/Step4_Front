@@ -170,7 +170,7 @@ export default function LoginPage() {
                         <button
                             type="button"
                             onClick={() => router.push('/signup')}
-                            className="font-bold text-base hover:underline"
+                            className="font-normal text-sm hover:underline"
                             style={{ color: '#00A0E9' }}
                         >
                             アカウントをお持ちでない方はこちら
