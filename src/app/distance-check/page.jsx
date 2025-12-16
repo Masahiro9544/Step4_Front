@@ -44,7 +44,7 @@ export default function DistanceCheckPage() {
 
     return (
         <main className="min-h-screen pb-20 safe-area-inset-bottom" style={{ backgroundColor: '#F6F9FB' }}>
-            <header className="px-6 py-6 flex items-center bg-white shadow-md rounded-b-3xl sticky top-0 z-10">
+            <header className="px-6 py-6 flex items-center bg-white shadow-md rounded-b-3xl">
                 <Link href="/" className="flex items-center font-bold text-gray-600 hover:text-gray-800 transition-colors">
                     <span className="text-2xl mr-2">←</span>
                     <span className="text-lg">もどる</span>

@@ -9,21 +9,35 @@ function AuthCallbackContent() {
     const searchParams = useSearchParams();
     const { handleLineCallback } = useAuth();
     const [status, setStatus] = useState('Verifying...');
+    const [processed, setProcessed] = useState(false);
 
     useEffect(() => {
+        // Prevent duplicate execution
+        if (processed) return;
+
         const code = searchParams.get('code');
         const state = searchParams.get('state');
 
+        console.log('LINE callback params:', { code, state, hasCode: !!code, hasState: !!state });
+
         if (code && state) {
+            setProcessed(true);
             handleLineCallback(code, state)
                 .catch((err) => {
-                    console.error(err);
+                    console.error('LINE callback error:', err);
+                    if (err.response) {
+                        console.error('Error response data:', err.response.data);
+                        console.error('Error response status:', err.response.status);
+                    }
                     setStatus('Login failed. Please try again.');
+                    setProcessed(false);
                 });
         } else {
+            console.error('Missing callback parameters:', { code: !!code, state: !!state });
             setStatus('Invalid callback parameters.');
         }
-    }, [searchParams, handleLineCallback]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Empty dependency array to run only once
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
