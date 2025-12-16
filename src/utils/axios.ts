@@ -1,7 +1,8 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const baseURL = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/v1`;
+// const baseURL = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/v1`;
+const baseURL = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`;
 
 const api = axios.create({
     baseURL,

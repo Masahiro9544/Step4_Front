@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const config = accessToken ? {
                 headers: { Authorization: `Bearer ${accessToken}` }
             } : {};
-            const { data } = await api.get('/auth/children', config);
+            const { data } = await api.get('/v1/auth/children', config);
             setChildrenList(data.children);
 
             // If only one child, auto-select
@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const token = Cookies.get('access_token');
             if (token) {
                 try {
-                    const { data } = await api.get('/auth/me');
+                    const { data } = await api.get('/v1/auth/me');
                     setUser(data);
 
                     // Fetch children for this parent
@@ -96,17 +96,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const loginEmail = async (email: string, password: string) => {
         // Initial login to get verification code
-        const { data } = await api.post('/auth/login', { email, password });
+        const { data } = await api.post('/v1/auth/login', { email, password });
         return data; // Returns session_id, verification_code (for display)
     };
 
     const register = async (email: string, password: string) => {
-        const { data } = await api.post('/auth/register', { email, password });
+        const { data } = await api.post('/v1/auth/register', { email, password });
         return data;
     };
 
     const verifyCode = async (sessionId: string, code: string) => {
-        const { data } = await api.post('/auth/verify-code', {
+        const { data } = await api.post('/v1/auth/verify-code', {
             session_id: sessionId,
             verification_code: code,
         });
@@ -136,7 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const loginLine = async () => {
         try {
-            const { data } = await api.get('/auth/line/login');
+            const { data } = await api.get('/v1/auth/line/login');
             window.location.href = data.url;
         } catch (error) {
             console.error("LINE Login init failed", error);
@@ -144,7 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const handleLineCallback = async (code: string, state: string) => {
-        const { data } = await api.post('/auth/line/callback', { code, state });
+        const { data } = await api.post('v1/auth/line/callback', { code, state });
 
         // Save tokens with path option to ensure they're available across the app
         Cookies.set('access_token', data.access_token, {
