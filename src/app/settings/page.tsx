@@ -8,12 +8,14 @@ import ChildSelector from '@/components/settings/ChildSelector';
 import SettingsToggle from '@/components/settings/SettingsToggle';
 import ChildForm from '@/components/settings/ChildForm';
 import { useAuth } from '@/context/AuthContext';
+import { useSoundContext } from '@/context/SoundContext';
 
 import api from '@/utils/axios';
 
 export default function SettingsPage() {
     const router = useRouter();
     const { user, logout, selectChild, selectedChildId } = useAuth();
+    const { setSound } = useSoundContext();
     const [settings, setSettings] = useState<Settings | null>(null);
     const [childrenList, setChildrenList] = useState<Child[]>([]);
     const [loading, setLoading] = useState(true);
@@ -38,6 +40,10 @@ export default function SettingsPage() {
                 baseURL: `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`
             });
             setSettings(settingsData);
+            // Sync global sound state with backend setting
+            if (settingsData && typeof settingsData.voice_enabled === 'boolean') {
+                setSound(settingsData.voice_enabled);
+            }
 
             // 2. Fetch Children
             const { data: childrenData } = await api.get(`/child/all/${user.parent_id}`, {
@@ -64,6 +70,8 @@ export default function SettingsPage() {
         if (!settings || !user?.parent_id) return;
         // Optimistic update
         setSettings({ ...settings, voice_enabled: enabled });
+        // Sync global context
+        setSound(enabled);
 
         try {
             await api.put(`/settings/${user.parent_id}`, { voice_enabled: enabled }, {

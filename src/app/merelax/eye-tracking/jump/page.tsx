@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { logExercise } from '@/lib/api';
 import SoundToggle from '@/components/merelax/SoundToggle';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+
 import { useSound } from '@/hooks/useSound';
 import { useAuth } from '@/context/AuthContext';
 
@@ -13,21 +13,67 @@ export default function JumpPage() {
     const router = useRouter();
     const [isCompleted, setIsCompleted] = useState(false);
     const [isStarted, setIsStarted] = useState(false);
+    const [message, setMessage] = useState('');
     const [score, setScore] = useState(0);
     const [position, setPosition] = useState({ top: '50%', left: '50%' });
     const [showCharacter, setShowCharacter] = useState(false);
     const { playSuccessSound, playSound } = useSound();
-    const { speak } = useTextToSpeech();
+
     const { selectedChildId } = useAuth();
+
+    const handleComplete = async () => {
+        if (!selectedChildId) return;
+
+        try {
+            // ボイスを最優先で再生
+            playSound('/sounds/owarimerelax.wav');
+
+            // ファンファーレは少し遅らせる
+            setTimeout(() => {
+                playSuccessSound();
+            }, 1000);
+
+
+            const today = new Date().toISOString().split('T')[0];
+
+            // ログ送信にタイムアウトを設定 (3秒で強制終了)
+            const logPromise = logExercise(selectedChildId, {
+                exercise_id: 3,
+                exercise_date: today,
+            });
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Log timeout')), 3000));
+            const response: any = await Promise.race([logPromise, timeoutPromise]);
+
+            setMessage(response.message);
+        } catch (error) {
+            setMessage('すごい！ たくさん みつけたね！');
+            console.error("Logging error or timeout:", error);
+        } finally {
+            setIsCompleted(true);
+            setTimeout(() => {
+                router.push('/merelax');
+            }, 3000);
+        }
+    };
+
+    // 最新のhandleCompleteを保持するRef
+    const handleCompleteRef = useRef(handleComplete);
+    useEffect(() => {
+        handleCompleteRef.current = handleComplete;
+    }, [handleComplete]);
+
+    // 終了タイマー (40秒固定)
+    useEffect(() => {
+        if (!isStarted || isCompleted) return;
+        const timer = setTimeout(() => {
+            handleCompleteRef.current();
+        }, 40000);
+        return () => clearTimeout(timer);
+    }, [isStarted, isCompleted]);
 
     // ゲームループ
     useEffect(() => {
         if (!isStarted || isCompleted) return;
-
-        // 40秒で終了
-        const finishTimer = setTimeout(() => {
-            handleComplete();
-        }, 40000);
 
         // 前回の位置（象限管理用: 0=左上, 1=右上, 2=左下, 3=右下）
         let prevQuadrant = -1;
@@ -64,33 +110,11 @@ export default function JumpPage() {
         }, 1500);
 
         return () => {
-            clearTimeout(finishTimer);
             clearInterval(interval);
         };
     }, [isStarted, isCompleted]);
 
-    const handleComplete = async () => {
-        if (!selectedChildId) return;
 
-        try {
-            playSuccessSound();
-            playSound('/sounds/owarimerelax.wav');
-            speak("よく みつけたね！");
-
-            const today = new Date().toISOString().split('T')[0];
-            await logExercise(selectedChildId, {
-                exercise_id: 5,
-                exercise_date: today,
-            });
-
-            setIsCompleted(true);
-            setTimeout(() => {
-                router.push('/merelax');
-            }, 3000);
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     if (!isStarted) {
         return (
@@ -141,9 +165,24 @@ export default function JumpPage() {
             </AnimatePresence>
 
             {isCompleted && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-                    <div className="text-white text-3xl font-bold">おしまい！</div>
-                </div>
+                <motion.div
+                    key="modal"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                >
+                    <motion.div
+                        initial={{ y: 50 }}
+                        animate={{ y: 0 }}
+                        className="bg-[#1a1f2e] p-8 rounded-3xl shadow-2xl text-center border border-white/10"
+                    >
+                        <div className="text-6xl mb-4">👀✨</div>
+                        <div className="text-2xl font-bold text-white">
+                            {message}
+                        </div>
+                    </motion.div>
+                </motion.div>
             )}
         </div>
     );

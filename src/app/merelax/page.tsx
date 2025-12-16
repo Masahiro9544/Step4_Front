@@ -13,7 +13,7 @@ import ExerciseButton from '@/components/merelax/ExerciseButton';
 import SoundToggle from '@/components/merelax/SoundToggle';
 import CharacterGreeting from '@/components/merelax/CharacterGreeting';
 import Footer from '@/components/Footer';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+
 import { useBGM } from '@/hooks/useBGM';
 import { useSound } from '@/hooks/useSound';
 import { useAuth } from '@/context/AuthContext';
@@ -27,7 +27,7 @@ export default function MerelaxPage() {
     const [stats, setStats] = useState<ExerciseStats | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const { speak } = useTextToSpeech();
+
     const { playBGM, stopBGM } = useBGM();
     const { soundEnabled, playSound } = useSound();
     const { selectedChildId } = useAuth();
@@ -54,11 +54,11 @@ export default function MerelaxPage() {
             playPromise();
 
             // 初回のみ挨拶
-            speak("こんにちは！ きょうも めを たいせつに しようね");
+            // speak("こんにちは！ きょうも めを たいせつに しようね");
         } else {
             stopBGM();
         }
-    }, [soundEnabled, loading, playBGM, stopBGM, speak]);
+    }, [soundEnabled, loading, playBGM, stopBGM]);
 
     const fetchStats = async () => {
         if (!selectedChildId) {

@@ -1,10 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
+import api from '@/utils/axios';
 
 type SoundContextType = {
     soundEnabled: boolean;
     toggleSound: () => void;
+    setSound: (enabled: boolean) => void;
     registerAudio: (audio: HTMLAudioElement) => void;
     stopAll: () => void;
 };
@@ -12,7 +15,7 @@ type SoundContextType = {
 const SoundContext = createContext<SoundContextType | undefined>(undefined);
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {
-    const [soundEnabled, setSoundEnabled] = useState(true);
+    const [soundEnabled, setSoundEnabledState] = useState(true);
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
@@ -20,7 +23,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('merelax_sound_enabled');
             if (saved !== null) {
-                setSoundEnabled(saved === 'true');
+                setSoundEnabledState(saved === 'true');
             }
         }
 
@@ -28,17 +31,41 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
         return () => stopAll();
     }, []);
 
+    // ユーザーログイン時にDB設定を同期
+    const { user } = useAuth();
+    useEffect(() => {
+        const syncSettings = async () => {
+            if (!user?.parent_id) return;
+            try {
+                // SettingsAPIは /api/settings/... (v1ではない) なので baseURL を上書き
+                const { data } = await api.get(`/settings/${user.parent_id}`, {
+                    baseURL: `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`
+                });
+                if (data && typeof data.voice_enabled === 'boolean') {
+                    setSoundEnabledState(data.voice_enabled);
+                    if (typeof window !== 'undefined') {
+                        localStorage.setItem('merelax_sound_enabled', String(data.voice_enabled));
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to sync global sound settings', e);
+            }
+        };
+        syncSettings();
+    }, [user?.parent_id]);
+
+    const setSound = (enabled: boolean) => {
+        setSoundEnabledState(enabled);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('merelax_sound_enabled', String(enabled));
+        }
+        if (!enabled) {
+            stopAll();
+        }
+    };
+
     const toggleSound = () => {
-        setSoundEnabled(prev => {
-            const newValue = !prev;
-            if (typeof window !== 'undefined') {
-                localStorage.setItem('merelax_sound_enabled', String(newValue));
-            }
-            if (!newValue) {
-                stopAll();
-            }
-            return newValue;
-        });
+        setSound(!soundEnabled);
     };
 
     const registerAudio = (audio: HTMLAudioElement) => {
@@ -66,7 +93,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <SoundContext.Provider value={{ soundEnabled, toggleSound, registerAudio, stopAll }}>
+        <SoundContext.Provider value={{ soundEnabled, toggleSound, setSound, registerAudio, stopAll }}>
             {children}
         </SoundContext.Provider>
     );

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, useAnimation } from 'framer-motion';
 import { logExercise } from '@/lib/api';
 import SoundToggle from '@/components/merelax/SoundToggle';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+
 import { useSound } from '@/hooks/useSound';
 import { useAuth } from '@/context/AuthContext';
 
@@ -16,58 +16,64 @@ export default function EyeTrackingPage() {
     const [message, setMessage] = useState('');
     const [animationPhase, setAnimationPhase] = useState('phase1');
     const { playSuccessSound, playSound } = useSound();
-    const { speak } = useTextToSpeech();
+
     const { selectedChildId } = useAuth();
-
-    // 1. アニメーション制御 (宣言的)
-    // useEffect削除 - stateとvariantsで制御
-
-    // 2. 音声・タイマー制御
-    useEffect(() => {
-        if (!isStarted || isCompleted) return;
-
-        // 1分後に終了
-        const finishTimer = setTimeout(() => {
-            handleComplete();
-        }, 60000);
-
-        // 応援ボイス
-        const voiceTimer = setTimeout(() => {
-            speak("その ちょうし！ ボールを めだけで おってね");
-        }, 13000);
-
-        return () => {
-            clearTimeout(finishTimer);
-            clearTimeout(voiceTimer);
-        };
-    }, [isStarted, isCompleted, speak, playSound]);
 
     const handleComplete = async () => {
         if (!selectedChildId) return;
 
         try {
-            // 成功音SE
-            playSuccessSound();
+            // ボイスを最優先で再生
             playSound('/sounds/owarimerelax.wav');
-            speak("すごい しゅうちゅうりょく だね！");
+
+            // ファンファーレは少し遅らせる
+            setTimeout(() => {
+                playSuccessSound();
+            }, 1000);
+
 
             const today = new Date().toISOString().split('T')[0];
-            const response = await logExercise(selectedChildId, {
-                exercise_id: 3, // eye_tracking
+
+            const logPromise = logExercise(selectedChildId, {
+                exercise_id: 3,
                 exercise_date: today,
             });
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Log timeout')), 3000));
+
+            const response: any = await Promise.race([logPromise, timeoutPromise]);
 
             setMessage(response.message);
+        } catch (error) {
+            setMessage('すごい しゅうちゅうりょく だね！');
+            console.error("Logging error or timeout:", error);
+        } finally {
             setIsCompleted(true);
-
             setTimeout(() => {
                 router.push('/merelax');
-            }, 2000);
-        } catch (error) {
-            setMessage('エラーが発生しました');
-            console.error(error);
+            }, 3000);
         }
     };
+
+    // 1. アニメーション制御 (宣言的)
+    // useEffect削除 - stateとvariantsで制御
+
+    // 2. 音声・タイマー制御
+    // 最新のhandleCompleteを保持するRef
+    const handleCompleteRef = useRef(handleComplete);
+    useEffect(() => {
+        handleCompleteRef.current = handleComplete;
+    }, [handleComplete]);
+
+    // 終了タイマー (60秒固定)
+    useEffect(() => {
+        if (!isStarted || isCompleted) return;
+        const timer = setTimeout(() => {
+            handleCompleteRef.current();
+        }, 60000);
+        return () => clearTimeout(timer);
+    }, [isStarted, isCompleted]);
+
+
 
     if (!isStarted) {
         return (
@@ -198,9 +204,11 @@ export default function EyeTrackingPage() {
 
                 {isCompleted && (
                     <motion.div
+                        key="modal"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm"
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
                     >
                         <motion.div
                             initial={{ y: 50 }}

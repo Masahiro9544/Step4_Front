@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { logExercise } from '@/lib/api';
 import SoundToggle from '@/components/merelax/SoundToggle';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+
 import CharacterBlink from '@/components/merelax/CharacterBlink';
 import { useSound } from '@/hooks/useSound';
 import { useAuth } from '@/context/AuthContext';
@@ -17,17 +17,62 @@ export default function BlinkPage() {
     const [message, setMessage] = useState('');
     const [characterBlinking, setCharacterBlinking] = useState(false);
     const { playSuccessSound, playSound } = useSound();
-    const { speak } = useTextToSpeech();
+
     const { selectedChildId } = useAuth();
 
-    // リズムガイド音声
+    const handleComplete = async () => {
+        if (!selectedChildId) return;
+
+        try {
+            // ボイスを最優先で再生
+            playSound('/sounds/owarimerelax.wav');
+
+            // ファンファーレは少し遅らせる
+            setTimeout(() => {
+                playSuccessSound();
+            }, 1000);
+
+
+            const today = new Date().toISOString().split('T')[0];
+
+            const logPromise = logExercise(selectedChildId, {
+                exercise_id: 2,
+                exercise_date: today,
+            });
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Log timeout')), 3000));
+
+            const response: any = await Promise.race([logPromise, timeoutPromise]);
+
+            setMessage(response.message);
+        } catch (error) {
+            setMessage('すごい！ よくがんばったね！');
+            console.error("Logging error or timeout:", error);
+        } finally {
+            setIsCompleted(true);
+            setTimeout(() => {
+                router.push('/merelax');
+            }, 3000);
+        }
+    };
+
+    // 最新のhandleCompleteを保持するRef
+    const handleCompleteRef = useRef(handleComplete);
+    useEffect(() => {
+        handleCompleteRef.current = handleComplete;
+    }, [handleComplete]);
+
+    // 終了タイマー (40秒固定)
     useEffect(() => {
         if (!isStarted || isCompleted) return;
-
-        // 40秒後に終了
-        const finishTimer = setTimeout(() => {
-            handleComplete();
+        const timer = setTimeout(() => {
+            handleCompleteRef.current();
         }, 40000);
+        return () => clearTimeout(timer);
+    }, [isStarted, isCompleted]);
+
+    // リズムガイド音声ループ
+    useEffect(() => {
+        if (!isStarted || isCompleted) return;
 
         let innerTimer: NodeJS.Timeout;
 
@@ -48,39 +93,13 @@ export default function BlinkPage() {
         const interval = setInterval(loop, 2000);
 
         return () => {
-            clearTimeout(finishTimer);
             clearTimeout(timer1);
             clearInterval(interval);
             clearTimeout(innerTimer);
         };
-    }, [isStarted, isCompleted, speak, playSound]);
+    }, [isStarted, isCompleted, playSound]);
 
-    const handleComplete = async () => {
-        if (!selectedChildId) return;
 
-        try {
-            // 成功音SE
-            playSuccessSound();
-            playSound('/sounds/owarimerelax.wav');
-            speak("すごい！ めが スッキリ したね");
-
-            const today = new Date().toISOString().split('T')[0];
-            const response = await logExercise(selectedChildId, {
-                exercise_id: 2, // blink
-                exercise_date: today,
-            });
-
-            setMessage(response.message);
-            setIsCompleted(true);
-
-            setTimeout(() => {
-                router.push('/merelax');
-            }, 2000);
-        } catch (error) {
-            setMessage('エラーが発生しました');
-            console.error(error);
-        }
-    };
 
     if (!isStarted) {
         return (
@@ -190,7 +209,7 @@ export default function BlinkPage() {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm"
+                        className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm"
                     >
                         <motion.div
                             initial={{ scale: 0.5, rotate: -20 }}
