@@ -28,7 +28,7 @@ export default function ResultScreen({ distance, onRetry, onSave }) {
     const handleSave = async () => {
         setSaving(true);
         try {
-            const response = await fetch('http://localhost:8000/api/distance-check', {
+            const response = await fetch(`${NEXT_PUBLIC_API_ENDPOINT}/api/distance-check`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -66,18 +66,26 @@ export default function ResultScreen({ distance, onRetry, onSave }) {
                 <p className="text-gray-600 px-4">{subMsg}</p>
             </div>
 
-            <div className="w-full flex flex-col gap-3 px-4">
+            <div className="w-full flex flex-col gap-4 px-4">
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className={`btn btn-lg w-full text-white rounded-xl shadow-md bg-blue-500 hover:bg-blue-600 border-none ${saving ? 'loading' : ''}`}
+                    className={`w-full py-4 px-6 rounded-xl text-white text-lg font-bold shadow-lg transition-all ${
+                        saving
+                            ? 'opacity-50 cursor-not-allowed bg-blue-400'
+                            : 'bg-blue-500 hover:bg-blue-600 hover:shadow-xl active:scale-95'
+                    }`}
                 >
                     {saving ? 'ほぞんしています...' : 'けっかをほぞんする'}
                 </button>
                 <button
                     onClick={onRetry}
                     disabled={saving}
-                    className="btn btn-lg w-full text-white rounded-xl shadow-md bg-blue-500 hover:bg-blue-600 border-none"
+                    className={`w-full py-4 px-6 rounded-xl text-white text-lg font-bold shadow-lg transition-all ${
+                        saving
+                            ? 'opacity-50 cursor-not-allowed bg-blue-400'
+                            : 'bg-blue-500 hover:bg-blue-600 hover:shadow-xl active:scale-95'
+                    }`}
                 >
                     もういちどはかる
                 </button>
