@@ -34,7 +34,35 @@ export default function LoginPage() {
             router.push(verifyUrl);
         } catch (err: any) {
             console.error('Login error:', err);
-            const errorMessage = err.response?.data?.detail || err.message || 'ログインに失敗しました。メールアドレスとパスワードを確認してください。';
+            // エラーメッセージを日本語に変換
+            let errorMessage = 'ログインに失敗しました。メールアドレスとパスワードを確認してください。';
+
+            const apiError = err.response?.data?.detail || err.message;
+            if (apiError) {
+                // 英語のエラーメッセージを日本語にマッピング
+                const errorMap: { [key: string]: string } = {
+                    'Invalid credentials': 'メールアドレスまたはパスワードが正しくありません。',
+                    'User not found': 'ユーザーが見つかりません。',
+                    'Invalid email or password': 'メールアドレスまたはパスワードが正しくありません。',
+                    'Email not verified': 'メールアドレスが確認されていません。',
+                    'Account is disabled': 'アカウントが無効になっています。',
+                    'Network Error': 'ネットワークエラーが発生しました。接続を確認してください。',
+                    'Request failed': 'リクエストに失敗しました。しばらくしてからもう一度お試しください。',
+                };
+
+                // 部分一致で検索
+                const matchedKey = Object.keys(errorMap).find(key =>
+                    apiError.toLowerCase().includes(key.toLowerCase())
+                );
+
+                if (matchedKey) {
+                    errorMessage = errorMap[matchedKey];
+                } else if (apiError.includes('パスワード') || apiError.includes('メール')) {
+                    // すでに日本語のメッセージの場合はそのまま使用
+                    errorMessage = apiError;
+                }
+            }
+
             setError(errorMessage);
         }
     };

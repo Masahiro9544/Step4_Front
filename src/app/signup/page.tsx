@@ -45,7 +45,38 @@ export default function SignupPage() {
             const verifyUrl = `/verify?session_id=${data.session_id}&code=${data.verification_code}`;
             router.push(verifyUrl);
         } catch (err: any) {
-            setError(err.response?.data?.detail || '登録に失敗しました。もう一度お試しください。');
+            // エラーメッセージを日本語に変換
+            let errorMessage = '登録に失敗しました。もう一度お試しください。';
+
+            const apiError = err.response?.data?.detail || err.message;
+            if (apiError) {
+                // 英語のエラーメッセージを日本語にマッピング
+                const errorMap: { [key: string]: string } = {
+                    'Email already exists': 'このメールアドレスは既に登録されています。',
+                    'Email already registered': 'このメールアドレスは既に登録されています。',
+                    'Invalid email format': 'メールアドレスの形式が正しくありません。',
+                    'Password too short': 'パスワードが短すぎます。6文字以上で入力してください。',
+                    'Password too weak': 'パスワードが弱すぎます。より複雑なパスワードを設定してください。',
+                    'Invalid password': 'パスワードが無効です。',
+                    'User already exists': 'このユーザーは既に存在します。',
+                    'Network Error': 'ネットワークエラーが発生しました。接続を確認してください。',
+                    'Request failed': 'リクエストに失敗しました。しばらくしてからもう一度お試しください。',
+                };
+
+                // 部分一致で検索
+                const matchedKey = Object.keys(errorMap).find(key =>
+                    apiError.toLowerCase().includes(key.toLowerCase())
+                );
+
+                if (matchedKey) {
+                    errorMessage = errorMap[matchedKey];
+                } else if (apiError.includes('パスワード') || apiError.includes('メール') || apiError.includes('登録')) {
+                    // すでに日本語のメッセージの場合はそのまま使用
+                    errorMessage = apiError;
+                }
+            }
+
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
