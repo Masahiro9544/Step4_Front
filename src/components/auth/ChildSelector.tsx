@@ -23,7 +23,7 @@ export default function ChildSelectorModal() {
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white rounded-3xl p-8 max-w-md w-full mx-4"
+                className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 max-h-[90vh] flex flex-col"
                 style={{
                     boxShadow: '0 20px 60px rgba(0, 160, 233, 0.3)'
                 }}
@@ -38,7 +38,7 @@ export default function ChildSelectorModal() {
                     </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 overflow-y-auto pr-2" style={{ maxHeight: 'calc(90vh - 220px)' }}>
                     {children.map((child) => (
                         <motion.button
                             key={child.child_id}
