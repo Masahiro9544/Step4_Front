@@ -38,23 +38,23 @@ export default function ChildSelectorModal() {
                     </p>
                 </div>
 
-                <div className="space-y-3 overflow-y-auto pr-2" style={{ maxHeight: 'calc(90vh - 220px)' }}>
+                <div className="grid grid-cols-2 gap-3 overflow-y-auto pr-2" style={{ maxHeight: 'calc(90vh - 220px)' }}>
                     {children.map((child) => (
                         <motion.button
                             key={child.child_id}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => handleSelectChild(child.child_id)}
-                            className="w-full p-5 rounded-2xl font-bold text-lg transition-all text-white"
+                            className="p-5 rounded-2xl font-bold text-lg transition-all text-white"
                             style={{
                                 background: 'linear-gradient(135deg, #4DC4FF 0%, #00A0E9 100%)',
                                 boxShadow: '0 4px 15px rgba(0, 160, 233, 0.3)'
                             }}
                         >
-                            <div className="flex items-center justify-between">
-                                <span>{child.name}</span>
+                            <div className="flex flex-col items-center text-center">
+                                <span className="mb-1">{child.name}</span>
                                 {child.grade && (
-                                    <span className="text-sm opacity-90">({child.grade})</span>
+                                    <span className="text-sm opacity-90">{child.grade}</span>
                                 )}
                             </div>
                         </motion.button>
