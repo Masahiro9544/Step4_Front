@@ -20,14 +20,21 @@ export default function ScreenTimePage() {
     const syncRef = useRef<NodeJS.Timeout | null>(null);
     const isPausedRef = useRef(false); // isPausedの最新値を保持
 
-    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`;
+    // ランダムな初期メッセージ
+    const [initialMessage] = useState(() => {
+        const messages = ['スタートを おしてね！', 'じかんを はかるよ〜'];
+        return messages[Math.floor(Math.random() * messages.length)];
+    });
+
+    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000'}/api/v1`;
+    const SETTINGS_API = `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000'}/api`;
 
     // 1. Initialize: Get Child ID & Status
     useEffect(() => {
         async function init() {
             try {
                 // Fetch Child ID from settings
-                const settingsRes = await fetch(`${API_BASE}/settings/1`);
+                const settingsRes = await fetch(`${SETTINGS_API}/settings/1`);
                 let currentChildId = 1;
                 if (settingsRes.ok) {
                     const settings = await settingsRes.json();
@@ -232,7 +239,7 @@ export default function ScreenTimePage() {
                 screentime_id: 0,
                 is_active: false,
                 elapsed_seconds: 0,
-                message: 'いま どのくらい つかってるかな？',
+                message: initialMessage,
                 alert_level: 0
             });
         } catch (e) {
@@ -247,7 +254,7 @@ export default function ScreenTimePage() {
                 screentime_id: 0,
                 is_active: false,
                 elapsed_seconds: 0,
-                message: 'いま どのくらい つかってるかな？',
+                message: initialMessage,
                 alert_level: 0
             });
         } finally {
@@ -275,7 +282,7 @@ export default function ScreenTimePage() {
                     screentime_id: 0,
                     is_active: false,
                     elapsed_seconds: 0,
-                    message: 'いま どのくらい つかってるかな？',
+                    message: initialMessage,
                     alert_level: 0
                 });
             }
@@ -296,7 +303,7 @@ export default function ScreenTimePage() {
                     <span className="text-sm sm:text-lg">もどる</span>
                 </Link>
                 <h1 className="flex-1 text-center text-xl sm:text-2xl md:text-3xl font-bold pr-12 sm:pr-16 md:pr-20 leading-tight" style={{ color: '#00A0E9' }}>
-                    ⏱️ スマホをつかったじかん
+                    ⏱️ スマホじかんタイマー
                 </h1>
             </header>
 
@@ -305,7 +312,7 @@ export default function ScreenTimePage() {
                 {/* Character */}
                 <div className="w-full">
                     <CharacterMessage
-                        message={status?.message || "いま どのくらい つかってるかな？"}
+                        message={status?.message || initialMessage}
                     />
                 </div>
 
