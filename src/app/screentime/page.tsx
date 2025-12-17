@@ -20,7 +20,7 @@ export default function ScreenTimePage() {
     const syncRef = useRef<NodeJS.Timeout | null>(null);
     const isPausedRef = useRef(false); // isPausedの最新値を保持
 
-    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000'}/api/v1`;
+    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`;
 
     // 1. Initialize: Get Child ID & Status
     useEffect(() => {
@@ -290,17 +290,17 @@ export default function ScreenTimePage() {
 
     return (
         <main className="min-h-screen pb-20 safe-area-inset-bottom" style={{ backgroundColor: '#F6F9FB' }}>
-            <header className="px-6 py-6 flex items-center bg-white shadow-md rounded-b-3xl sticky top-0 z-10">
+            <header className="px-4 sm:px-6 py-4 sm:py-6 flex items-center bg-white shadow-md rounded-b-3xl sticky top-0 z-10">
                 <Link href="/" className="flex items-center font-bold text-gray-600 hover:text-gray-800 transition-colors">
-                    <span className="text-2xl mr-2">←</span>
-                    <span className="text-lg">もどる</span>
+                    <span className="text-xl sm:text-2xl mr-1 sm:mr-2">←</span>
+                    <span className="text-sm sm:text-lg">もどる</span>
                 </Link>
-                <h1 className="flex-1 text-center text-3xl font-bold pr-20 leading-tight" style={{ color: '#00A0E9' }}>
+                <h1 className="flex-1 text-center text-xl sm:text-2xl md:text-3xl font-bold pr-12 sm:pr-16 md:pr-20 leading-tight" style={{ color: '#00A0E9' }}>
                     ⏱️ スマホをつかったじかん
                 </h1>
             </header>
 
-            <div className="p-4 flex flex-col items-center gap-8">
+            <div className="p-3 sm:p-4 md:p-6 flex flex-col items-center gap-4 sm:gap-6 md:gap-8">
 
                 {/* Character */}
                 <div className="w-full">
@@ -328,13 +328,13 @@ export default function ScreenTimePage() {
 
                 {/* Info */}
                 {!status?.is_active && !isPaused && (
-                    <div className="p-6 rounded-2xl text-center font-bold text-xl" style={{ backgroundColor: '#E6F7FF', color: '#00A0E9' }}>
+                    <div className="p-4 sm:p-5 md:p-6 rounded-2xl text-center font-bold text-base sm:text-lg md:text-xl" style={{ backgroundColor: '#E6F7FF', color: '#00A0E9' }}>
                         📊 きょうは まだ つかってないよ
                     </div>
                 )}
 
                 {isPaused && (
-                    <div className="p-6 rounded-2xl text-center font-bold text-xl" style={{ backgroundColor: '#FFF9E6', color: '#FFA500' }}>
+                    <div className="p-4 sm:p-5 md:p-6 rounded-2xl text-center font-bold text-base sm:text-lg md:text-xl" style={{ backgroundColor: '#FFF9E6', color: '#FFA500' }}>
                         ⏸️ いったん おやすみちゅう
                     </div>
                 )}

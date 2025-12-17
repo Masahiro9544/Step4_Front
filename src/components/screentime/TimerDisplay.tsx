@@ -27,7 +27,7 @@ export default function TimerDisplay({ seconds, alertLevel }: TimerDisplayProps)
 
     return (
         <div
-            className="flex flex-col items-center justify-center p-10 rounded-3xl shadow-xl transition-colors duration-500"
+            className="flex flex-col items-center justify-center p-6 sm:p-8 md:p-10 rounded-3xl shadow-xl transition-colors duration-500 w-full max-w-2xl"
             style={{
                 backgroundColor: colors.bg,
                 borderWidth: '4px',
@@ -35,12 +35,16 @@ export default function TimerDisplay({ seconds, alertLevel }: TimerDisplayProps)
                 borderColor: colors.border
             }}
         >
-            <div className="text-gray-500 font-bold mb-3 text-xl">つかっている じかん</div>
-            <div className="flex items-baseline font-black tracking-tighter" style={{ color: colors.text }}>
-                <span className="text-8xl">{minutes}</span>
-                <span className="text-3xl ml-3">ふん</span>
-                <span className="text-7xl ml-6">{String(secs).padStart(2, '0')}</span>
-                <span className="text-3xl ml-3">びょう</span>
+            <div className="text-gray-500 font-bold mb-2 sm:mb-3 text-base sm:text-lg md:text-xl">つかっている じかん</div>
+            <div className="flex items-baseline font-black tracking-tighter flex-wrap justify-center gap-x-2 sm:gap-x-4" style={{ color: colors.text }}>
+                <div className="flex items-baseline">
+                    <span className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl">{minutes}</span>
+                    <span className="text-xl sm:text-2xl md:text-3xl ml-1 sm:ml-2 md:ml-3">ふん</span>
+                </div>
+                <div className="flex items-baseline">
+                    <span className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl">{String(secs).padStart(2, '0')}</span>
+                    <span className="text-xl sm:text-2xl md:text-3xl ml-1 sm:ml-2 md:ml-3">びょう</span>
+                </div>
             </div>
         </div>
     );
