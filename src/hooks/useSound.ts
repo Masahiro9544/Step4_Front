@@ -59,11 +59,12 @@ export function useSound() {
     const playSound = useCallback((audioUrl: string) => {
         if (!soundEnabled) return;
 
-        // 既存の音を止めてから鳴らす (被りを防ぐため)
-        // ここではstopAllまでしなくていいが、長尺SEの場合は以前のを止めたい
+        // 既存の音を止めてから鳴らす (被りを防ぐため) 
         stopAll();
 
         const audio = new Audio(audioUrl);
+        // 音量を30%に設定（大きすぎるため）
+        audio.volume = 0.3;
         registerAudio(audio);
         const playPromise = audio.play();
 

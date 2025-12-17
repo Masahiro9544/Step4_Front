@@ -3,6 +3,8 @@
 import React from 'react';
 
 import { useSound } from '@/hooks/useSound';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/utils/axios';
 
 interface SoundToggleProps {
     className?: string;
@@ -10,10 +12,31 @@ interface SoundToggleProps {
 
 export default function SoundToggle({ className = '' }: SoundToggleProps) {
     const { soundEnabled, toggleSound } = useSound();
+    const { user } = useAuth();
+
+    const handleToggle = async () => {
+        // 1. Immediate UI update (Context + LocalStorage)
+        toggleSound();
+
+        // 2. Background DB sync
+        if (user?.parent_id) {
+            try {
+                // toggleSound toggles the state, so the new state is !soundEnabled
+                // We use !soundEnabled here because state update might be async or buffered, 
+                // but toggleSound in context flips the boolean immediately for its own logic.
+                // Safest to send the intended value.
+                await api.put(`/settings/${user.parent_id}`, { voice_enabled: !soundEnabled }, {
+                    baseURL: `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`
+                });
+            } catch (error) {
+                console.error('Failed to sync sound setting to backend:', error);
+            }
+        }
+    };
 
     return (
         <button
-            onClick={toggleSound}
+            onClick={handleToggle}
             className={`flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-3 rounded-full text-merelax-primary font-bold shadow-lg hover:bg-white transition-all transform hover:scale-105 active:scale-95 border-2 border-merelax-primary/20 ${className}`}
             aria-label="音声切り替え"
         >

@@ -7,7 +7,7 @@ import { logExercise } from '@/lib/api';
 import SoundToggle from '@/components/merelax/SoundToggle';
 import CloudBackground from '@/components/merelax/CloudBackground';
 import { useSound } from '@/hooks/useSound';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+
 import CharacterDistance from '@/components/merelax/CharacterDistance';
 import { useAuth } from '@/context/AuthContext';
 
@@ -17,7 +17,7 @@ export default function DistanceViewPage() {
     const [isCompleted, setIsCompleted] = useState(false);
     const [message, setMessage] = useState('');
     const { playSuccessSound, playSound } = useSound();
-    const { speak } = useTextToSpeech();
+
     const { selectedChildId } = useAuth();
 
     const [isStarted, setIsStarted] = useState(false);
@@ -29,7 +29,7 @@ export default function DistanceViewPage() {
             // 成功音SE
             playSuccessSound();
             playSound('/sounds/owarimerelax.wav');
-            speak("よくやったね！");
+
 
             const today = new Date().toISOString().split('T')[0];
             const response = await logExercise(selectedChildId, {
@@ -48,7 +48,7 @@ export default function DistanceViewPage() {
             setMessage('エラーが発生しました');
             console.error(error);
         }
-    }, [selectedChildId, playSound, playSuccessSound, speak, router]);
+    }, [selectedChildId, playSound, playSuccessSound, router]);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -57,9 +57,7 @@ export default function DistanceViewPage() {
                 setTimer((prev) => {
                     const next = prev - 1;
                     // カウントダウン音声 (5秒前、3,2,1)
-                    if (next === 10) speak("あと10秒だよ");
-                    if (next <= 5 && next > 0) speak(String(next));
-                    if (next === 0) speak("おしまい！");
+
                     return next;
                 });
             }, 1000);
@@ -68,7 +66,7 @@ export default function DistanceViewPage() {
             handleComplete();
         }
         return () => clearInterval(interval);
-    }, [isStarted, timer, isCompleted, speak, handleComplete]);
+    }, [isStarted, timer, isCompleted, handleComplete]);
 
     if (!isStarted) {
         return (

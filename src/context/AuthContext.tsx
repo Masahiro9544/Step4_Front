@@ -45,7 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (user?.parent_id) {
             try {
-                await api.put(`/settings/${user.parent_id}`, { child_id: childId });
+                const API_BASE = process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000';
+                await api.put(`${API_BASE}/api/settings/${user.parent_id}`, { child_id: childId });
             } catch (error) {
                 console.error("Failed to persist selected child", error);
             }

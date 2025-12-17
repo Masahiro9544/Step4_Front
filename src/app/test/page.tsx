@@ -9,7 +9,7 @@ import { saveResult, saveEyeTest } from '@/lib/rfp-api';
 import { useAuth } from '@/context/AuthContext';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useVoiceGuidance } from '@/hooks/useVoiceGuidance';
-import { useSound } from '@/hooks/useRfpSound';
+import { useSound } from '@/hooks/useSound';
 import VisionTestCharacter from '@/components/VisionTestCharacter';
 
 function TestContent() {
@@ -38,7 +38,7 @@ function TestContent() {
     const [hasStarted, setHasStarted] = useState(false); // New: Explicit user start state
 
     const { speak, voiceCount, cancel } = useVoiceGuidance();
-    const { playSound, stopSound } = useSound();
+    const { playSound, stopAll: stopSound } = useSound();
 
     // Ref to control guide sequence cancellation and mount status
     const stopGuideRef = useRef(false);
@@ -100,7 +100,7 @@ function TestContent() {
             // speak('もういっかい！'); // Removed TTS
         }
 
-        playSound('koreha.wav'); // Question the next symbol
+        playSound('/sounds/koreha.wav'); // Question the next symbol
         answer(dir);
     }, [speak, answer, isSetup, startTest, hasStarted, currentDirection, cancel, playSound]);
 
@@ -124,9 +124,9 @@ function TestContent() {
             if (stopGuideRef.current || !isMounted.current) return;
 
             if (distance === '30cm') {
-                playSound('shiryoku30cm.wav');
+                playSound('/sounds/shiryoku30cm.wav');
             } else {
-                playSound('shiryoku3m.wav');
+                playSound('/sounds/shiryoku3m.wav');
             }
             await pause(12000); // Wait for distance voice (approx 11s)
 
@@ -134,7 +134,7 @@ function TestContent() {
 
             // Restored migimekarahidarime.wav here
             console.log('Playing migimekarahidarime.wav');
-            playSound('migimekarahidarime.wav');
+            playSound('/sounds/migimekarahidarime.wav');
             await pause(6000); // Wait for eye instruction (approx 5s)
 
             if (stopGuideRef.current || !isMounted.current) return;
@@ -169,7 +169,7 @@ function TestContent() {
     };
 
     const handleFinish = async () => {
-        playSound('otukare.wav');
+        playSound('/sounds/otukare.wav');
         let finalRightResult = state.result;
         let finalLeft = results.left;
 

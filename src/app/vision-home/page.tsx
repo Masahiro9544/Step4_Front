@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { getResults } from '@/lib/rfp-api';
-import { useSound } from '@/hooks/useRfpSound';
+import { useSound } from '@/hooks/useSound';
 
 export default function Home() {
   const [showReminder, setShowReminder] = useState(false);
@@ -60,17 +60,17 @@ export default function Home() {
           </p>
 
           <div className="grid grid-cols-1 gap-4">
-            <Link href="/test?distance=30cm" onClick={() => playSound('shiryokutyekku.wav')} className="block w-full py-5 bg-[#0093D0] hover:bg-[#007bb5] text-white rounded-2xl text-2xl font-bold transition-all shadow-md active:scale-95">
+            <Link href="/test?distance=30cm" onClick={() => playSound('/sounds/shiryokutyekku.wav')} className="block w-full py-5 bg-[#0093D0] hover:bg-[#007bb5] text-white rounded-2xl text-2xl font-bold transition-all shadow-md active:scale-95">
               30cm (ちかく)
             </Link>
-            <Link href="/test?distance=3m" onClick={() => playSound('shiryokutyekku.wav')} className="block w-full py-5 bg-[#81D4FA] hover:bg-[#4FC3F7] text-[#005b82] rounded-2xl text-2xl font-bold transition-all shadow-md active:scale-95">
+            <Link href="/test?distance=3m" onClick={() => playSound('/sounds/shiryokutyekku.wav')} className="block w-full py-5 bg-[#81D4FA] hover:bg-[#4FC3F7] text-[#005b82] rounded-2xl text-2xl font-bold transition-all shadow-md active:scale-95">
               3m (とおく)
             </Link>
           </div>
         </div>
 
         <div className="w-full">
-          <Link href="/dashboard" onClick={() => playSound('bottan.mp3')} className="block w-full py-3 bg-white text-[#0093D0] border-2 border-[#0093D0] rounded-2xl font-bold hover:bg-gray-50 transition-colors">
+          <Link href="/dashboard" onClick={() => playSound('/sounds/bottan.mp3')} className="block w-full py-3 bg-white text-[#0093D0] border-2 border-[#0093D0] rounded-2xl font-bold hover:bg-gray-50 transition-colors">
             きろくをみる (Dashboard)
           </Link>
         </div>
