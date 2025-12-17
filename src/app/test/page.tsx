@@ -219,10 +219,10 @@ function TestContent() {
             // 0.6 or lower (includes 0.5, 0.1)
             Suggestion = (
                 <div className="bg-red-50 border-l-4 border-red-500 p-4 text-left text-sm rounded-r-lg">
-                    <h3 className="font-bold text-lg text-red-700 mb-1">早めにチェックしよう</h3>
+                    <h3 className="font-bold text-lg text-red-700 mb-1">いますぐ 目のお医者さんで 視力検査を 受けよう</h3>
                     <p className="text-gray-700 leading-relaxed">
                         見えづらいかもしれません。早めに目のお医者さんでみてもらってね。<br />
-                        必要ならZoffでも視力チェックができます。
+                        Zoffでも視力検査が受けられるよ！
                     </p>
                 </div>
             );
