@@ -28,7 +28,7 @@ export default function ResultScreen({ distance, onRetry, onSave }) {
     const handleSave = async () => {
         setSaving(true);
         try {
-            const response = await fetch(`${NEXT_PUBLIC_API_ENDPOINT}/api/distance-check`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/distance-check`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

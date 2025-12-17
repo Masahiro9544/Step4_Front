@@ -20,7 +20,7 @@ export default function ScreenTimePage() {
     const syncRef = useRef<NodeJS.Timeout | null>(null);
     const isPausedRef = useRef(false); // isPausedの最新値を保持
 
-    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000'}/api/v1`;
+    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`;
 
     // 1. Initialize: Get Child ID & Status
     useEffect(() => {
