@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 import StartScreen from '../../components/DistanceCheck/StartScreen';
 import ResultScreen from '../../components/DistanceCheck/ResultScreen';
 
@@ -21,6 +22,7 @@ const MeasuringScreen = dynamic(
 );
 
 export default function DistanceCheckPage() {
+    const { selectedChildId } = useAuth();
     const [step, setStep] = useState('start'); // start, measuring, result
     const [distanceResult, setDistanceResult] = useState(null);
 
@@ -63,6 +65,7 @@ export default function DistanceCheckPage() {
                             distance={distanceResult}
                             onRetry={handleRetry}
                             onSave={handleSaveComplete}
+                            childId={selectedChildId}
                         />
                     )}
                 </div>
