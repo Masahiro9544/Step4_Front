@@ -20,7 +20,7 @@ export default function ControlButtons({ isActive, isPaused, onStart, onPause, o
                     whileTap={{ scale: 0.95 }}
                     onClick={onPause}
                     disabled={isLoading}
-                    className="flex-1 py-6 sm:py-7 md:py-8 text-white text-2xl sm:text-3xl font-black rounded-2xl shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3 md:gap-4 transition-opacity min-h-[80px] sm:min-h-[90px] md:min-h-[100px]"
+                    className="flex-1 py-6 sm:py-7 md:py-8 text-white text-2xl sm:text-3xl font-black rounded-[32px] shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3 md:gap-4 transition-opacity min-h-[80px] sm:min-h-[90px] md:min-h-[100px]"
                     style={{ backgroundColor: '#FF9EC4' }}
                 >
                     <span className="text-3xl sm:text-4xl">■</span>
@@ -30,7 +30,7 @@ export default function ControlButtons({ isActive, isPaused, onStart, onPause, o
                     whileTap={{ scale: 0.95 }}
                     onClick={onReset}
                     disabled={isLoading}
-                    className="flex-1 py-6 sm:py-7 md:py-8 text-white text-2xl sm:text-3xl font-black rounded-2xl shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3 md:gap-4 transition-opacity min-h-[80px] sm:min-h-[90px] md:min-h-[100px]"
+                    className="flex-1 py-6 sm:py-7 md:py-8 text-white text-2xl sm:text-3xl font-black rounded-[32px] shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3 md:gap-4 transition-opacity min-h-[80px] sm:min-h-[90px] md:min-h-[100px]"
                     style={{ backgroundColor: '#999' }}
                 >
                     <span className="text-3xl sm:text-4xl">↺</span>
@@ -66,7 +66,7 @@ export default function ControlButtons({ isActive, isPaused, onStart, onPause, o
                         whileTap={{ scale: 0.95 }}
                         onClick={onReset}
                         disabled={isLoading}
-                        className="flex-1 py-6 sm:py-7 md:py-8 text-white text-2xl sm:text-3xl font-black rounded-2xl shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3 md:gap-4 transition-opacity min-h-[80px] sm:min-h-[90px] md:min-h-[100px]"
+                        className="flex-1 py-6 sm:py-7 md:py-8 text-white text-2xl sm:text-3xl font-black rounded-[32px] shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3 md:gap-4 transition-opacity min-h-[80px] sm:min-h-[90px] md:min-h-[100px]"
                         style={{ backgroundColor: '#999' }}
                     >
                         <span className="text-3xl sm:text-4xl">↺</span>
@@ -76,7 +76,7 @@ export default function ControlButtons({ isActive, isPaused, onStart, onPause, o
                         whileTap={{ scale: 0.95 }}
                         onClick={onRecord}
                         disabled={isLoading}
-                        className="flex-1 py-6 sm:py-7 md:py-8 text-white text-2xl sm:text-3xl font-black rounded-2xl shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3 md:gap-4 transition-opacity min-h-[80px] sm:min-h-[90px] md:min-h-[100px]"
+                        className="flex-1 py-6 sm:py-7 md:py-8 text-white text-2xl sm:text-3xl font-black rounded-[32px] shadow-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3 md:gap-4 transition-opacity min-h-[80px] sm:min-h-[90px] md:min-h-[100px]"
                         style={{ backgroundColor: '#FFD83B', color: '#333' }}
                     >
                         <span className="text-3xl sm:text-4xl">✓</span>
