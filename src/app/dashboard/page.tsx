@@ -129,7 +129,7 @@ export default function DashboardPage() {
                     <span className="text-lg">もどる</span>
                 </Link>
                 <h1 className="flex-1 text-center text-3xl font-bold pr-20 leading-tight" style={{ color: '#00A0E9' }}>
-                    きろく (ダッシュボード)
+                    記録
                 </h1>
             </header>
 
