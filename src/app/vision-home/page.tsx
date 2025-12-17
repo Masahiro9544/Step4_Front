@@ -44,10 +44,10 @@ export default function Home() {
       )}
 
       <div className="max-w-md w-full text-center space-y-8">
-        <h1 className="text-5xl font-bold text-[#0093D0] tracking-wider drop-shadow-sm">
+        <h1 className="text-3xl sm:text-5xl font-bold text-[#0093D0] tracking-wider drop-shadow-sm">
           視力チェック
         </h1>
-        <p className="text-xl text-[#0093D0] font-medium">
+        <p className="text-base sm:text-xl text-[#0093D0] font-medium">
           おうちでかんたん視力チェック
         </p>
 
