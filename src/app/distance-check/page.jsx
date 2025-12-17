@@ -25,6 +25,7 @@ export default function DistanceCheckPage() {
     const { selectedChildId } = useAuth();
     const [step, setStep] = useState('start'); // start, measuring, result
     const [distanceResult, setDistanceResult] = useState(null);
+    const [saved, setSaved] = useState(false);
 
     const handleStart = () => {
         setStep('measuring');
@@ -38,10 +39,11 @@ export default function DistanceCheckPage() {
     const handleRetry = () => {
         setStep('measuring');
         setDistanceResult(null);
+        setSaved(false);
     };
 
     const handleSaveComplete = () => {
-        alert('保存しました！ダッシュボードへ移動します（仮）');
+        setSaved(true);
     };
 
     return (
@@ -66,6 +68,7 @@ export default function DistanceCheckPage() {
                             onRetry={handleRetry}
                             onSave={handleSaveComplete}
                             childId={selectedChildId}
+                            saved={saved}
                         />
                     )}
                 </div>

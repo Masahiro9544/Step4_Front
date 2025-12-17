@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 import api from '@/utils/axios';
 
-export default function ResultScreen({ distance, onRetry, onSave, childId }) {
+export default function ResultScreen({ distance, onRetry, onSave, childId, saved }) {
     const [saving, setSaving] = useState(false);
 
     let status = 'normal';
@@ -55,6 +56,32 @@ export default function ResultScreen({ distance, onRetry, onSave, childId }) {
             setSaving(false);
         }
     };
+
+    // 保存完了後の2択表示
+    if (saved) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full py-6 text-center w-full animate-fade-in">
+                <div className="mb-8">
+                    <div className="w-32 h-32 mb-6 relative mx-auto">
+                        <img src="/images/character/character_happy.png" alt="Success" className="w-full h-full object-contain drop-shadow-xl" />
+                    </div>
+                    <h2 className="text-3xl font-bold text-green-600 mb-4">
+                        ✓ ほぞんしました！
+                    </h2>
+                    <p className="text-gray-600 text-lg">どこにいどうしますか？</p>
+                </div>
+
+                <div className="w-full flex flex-col gap-4 px-4">
+                    <Link href="/home" className="w-full py-4 px-6 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-lg font-bold shadow-lg transition-all hover:shadow-xl active:scale-95 text-center">
+                        🏠 ホームがめんへ
+                    </Link>
+                    <Link href="/record" className="w-full py-4 px-6 rounded-xl bg-green-500 hover:bg-green-600 text-white text-lg font-bold shadow-lg transition-all hover:shadow-xl active:scale-95 text-center">
+                        📊 ダッシュボードへ
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center justify-between h-full py-6 text-center w-full animate-fade-in relative z-10">
