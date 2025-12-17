@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Footer from '@/components/Footer';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -237,8 +238,11 @@ export default function DashboardPage() {
                     <span className="text-2xl mr-2">←</span>
                     <span className="text-lg">もどる</span>
                 </Link>
-                <h1 className="flex-1 text-center text-3xl font-bold pr-20 leading-tight" style={{ color: '#00A0E9' }}>
-                    📊 ダッシュボード
+                <h1 className="flex-1 text-center text-xl font-bold pr-20 leading-tight flex items-center justify-center gap-2" style={{ color: '#00A0E9' }}>
+                    <div className="relative w-7 h-7">
+                        <Image src="/images/icon/statistics.png" alt="ダッシュボード" fill className="object-contain" />
+                    </div>
+                    <span>ダッシュボード</span>
                 </h1>
             </header>
 
@@ -248,15 +252,15 @@ export default function DashboardPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white rounded-2xl shadow-md p-6"
+                        className="bg-white rounded-2xl shadow-md p-4"
                     >
-                        <h2 className="text-xl font-bold mb-4" style={{ color: '#00A0E9' }}>お子さまを選択</h2>
-                        <div className="flex gap-3">
+                        <h2 className="text-base font-bold mb-3" style={{ color: '#00A0E9' }}>お子さまを選択</h2>
+                        <div className="grid grid-cols-2 gap-2">
                             {children.map((child) => (
                                 <button
                                     key={child.child_id}
                                     onClick={() => setSelectedChild(child.child_id)}
-                                    className={`px-6 py-3 rounded-xl font-bold transition-all ${selectedChild === child.child_id
+                                    className={`px-4 py-2 rounded-xl text-base font-bold transition-all whitespace-nowrap ${selectedChild === child.child_id
                                         ? 'text-white shadow-lg'
                                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                         }`}
@@ -274,14 +278,14 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-white rounded-2xl shadow-md p-6"
+                    className="bg-white rounded-2xl shadow-md p-4"
                 >
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold" style={{ color: '#00A0E9' }}>👁️ 視力チェック結果の推移</h2>
-                        <div className="flex gap-2">
+                    <div className="flex justify-between items-center mb-4 gap-2">
+                        <h2 className="text-base font-bold whitespace-nowrap" style={{ color: '#00A0E9' }}>👁️ 視力チェック結果</h2>
+                        <div className="flex gap-1 shrink-0">
                             <button
                                 onClick={() => setVisionPeriod('weekly')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${visionPeriod === 'weekly'
+                                className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${visionPeriod === 'weekly'
                                     ? 'text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
@@ -291,7 +295,7 @@ export default function DashboardPage() {
                             </button>
                             <button
                                 onClick={() => setVisionPeriod('monthly')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${visionPeriod === 'monthly'
+                                className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${visionPeriod === 'monthly'
                                     ? 'text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
@@ -373,11 +377,26 @@ export default function DashboardPage() {
                                             backgroundColor: 'white',
                                             border: '1px solid #E5E7EB',
                                             borderRadius: '8px',
-                                            fontSize: '12px'
+                                            fontSize: '11px',
+                                            padding: '8px'
                                         }}
-                                        formatter={(value: number) => {
-                                            if (value <= 0.1) return ['0.5未満', ''];
-                                            return [value, ''];
+                                        content={(props) => {
+                                            const { active, payload, label } = props;
+                                            if (active && payload && payload.length) {
+                                                return (
+                                                    <div className="bg-white border border-gray-200 rounded-lg p-2 shadow-lg text-xs">
+                                                        <p className="font-bold mb-1 text-gray-700">{label}</p>
+                                                        {payload.map((entry: any, index: number) => (
+                                                            entry.value !== null && (
+                                                                <p key={index} style={{ color: entry.color }} className="text-xs">
+                                                                    {entry.name}: {entry.value <= 0.1 ? '0.5未満' : entry.value}
+                                                                </p>
+                                                            )
+                                                        ))}
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
                                         }}
                                     />
                                     <Legend
@@ -428,9 +447,9 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="bg-white rounded-2xl shadow-md p-6"
+                    className="bg-white rounded-2xl shadow-md p-4"
                 >
-                    <h2 className="text-xl font-bold mb-4" style={{ color: '#00A0E9' }}>📏 画面からの距離</h2>
+                    <h2 className="text-base font-bold mb-4" style={{ color: '#00A0E9' }}>📏 画面からの距離</h2>
                     <div
                         className="rounded-xl p-8 text-center"
                         style={{ backgroundColor: getDistanceStatusColor(distanceData?.status || 'no_data') + '20' }}
@@ -462,14 +481,14 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-white rounded-2xl shadow-md p-6"
+                    className="bg-white rounded-2xl shadow-md p-4"
                 >
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold" style={{ color: '#00A0E9' }}>⏱️ スマホ使用時間</h2>
-                        <div className="flex gap-2">
+                    <div className="flex justify-between items-center mb-4 gap-2">
+                        <h2 className="text-base font-bold whitespace-nowrap" style={{ color: '#00A0E9' }}>⏱️ スマホ使用時間</h2>
+                        <div className="flex gap-1 shrink-0">
                             <button
                                 onClick={() => setScreenTimeView('weekly')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${screenTimeView === 'weekly'
+                                className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${screenTimeView === 'weekly'
                                     ? 'text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
@@ -479,7 +498,7 @@ export default function DashboardPage() {
                             </button>
                             <button
                                 onClick={() => setScreenTimeView('monthly')}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all ${screenTimeView === 'monthly'
+                                className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${screenTimeView === 'monthly'
                                     ? 'text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
@@ -534,9 +553,23 @@ export default function DashboardPage() {
                                             backgroundColor: 'white',
                                             border: '1px solid #E5E7EB',
                                             borderRadius: '8px',
-                                            fontSize: '12px'
+                                            fontSize: '11px',
+                                            padding: '8px'
                                         }}
-                                        formatter={(value: any) => [`${value}分`, '使用時間']}
+                                        content={(props) => {
+                                            const { active, payload, label } = props;
+                                            if (active && payload && payload.length) {
+                                                return (
+                                                    <div className="bg-white border border-gray-200 rounded-lg p-2 shadow-lg text-xs">
+                                                        <p className="font-bold mb-1 text-gray-700">{label}</p>
+                                                        <p className="text-xs" style={{ color: '#00A0E9' }}>
+                                                            使用時間: {payload[0].value}分
+                                                        </p>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
                                     />
                                     <Legend
                                         wrapperStyle={{ fontSize: '14px', paddingTop: '10px' }}
@@ -574,9 +607,9 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6"
+                    className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-4"
                 >
-                    <h3 className="text-lg font-bold mb-3" style={{ color: '#00A0E9' }}>💡 使用時間の目安</h3>
+                    <h3 className="text-base font-bold mb-3" style={{ color: '#00A0E9' }}>💡 使用時間の目安</h3>
                     <div className="space-y-2">
                         <div className="flex items-center gap-3">
                             <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#4CAF50' }}></div>
