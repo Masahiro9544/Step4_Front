@@ -6,25 +6,36 @@ interface ResultSummaryProps {
 }
 
 export default function ResultSummary({ results }: ResultSummaryProps) {
+    // 視力データをフォーマットする関数
+    const formatVision = (vision: string | null | undefined): string => {
+        if (!vision) return '-';
+        const visionValue = parseFloat(vision);
+        if (visionValue <= 0.1) {
+            return '0.5みまん';
+        }
+        return vision;
+    };
+
     return (
         <div className="w-full px-4 mb-24">
             <h2 className="text-xl font-bold text-gray-800 mb-4 ml-1">前のけっか</h2>
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                 <div className="flex divide-x divide-gray-100">
                     <div className="flex-1 text-center px-2">
-                        <div className="text-xs text-gray-400 mb-1">
-                            <div>しりょく</div>
-                            <div>(みぎ/ひだり)</div>
+                        <div className="text-xs text-gray-400 mb-1">しりょく</div>
+                        <div className="space-y-0.5">
+                            <p className="text-2xl font-bold text-merelax-primary">
+                                <span className="text-xs text-gray-400 font-normal mr-1">みぎ</span>
+                                {formatVision(results.right_eye)}
+                            </p>
+                            <p className="text-2xl font-bold text-merelax-primary">
+                                <span className="text-xs text-gray-400 font-normal mr-1">ひだり</span>
+                                {formatVision(results.left_eye)}
+                            </p>
                         </div>
-                        <p className="text-2xl font-bold text-merelax-primary">
-                            {results.right_eye || '-'} / {results.left_eye || '-'}
-                        </p>
                     </div>
                     <div className="flex-1 text-center px-2">
-                        <div className="text-xs text-gray-400 mb-1">
-                            <div>スマホとの</div>
-                            <div>きょり</div>
-                        </div>
+                        <div className="text-xs text-gray-400 mb-1">スマホきょり</div>
                         <p className="text-2xl font-bold text-merelax-distance">
                             {results.avg_distance_cm ? `${Math.round(results.avg_distance_cm)}cm` : '-'}
                         </p>
