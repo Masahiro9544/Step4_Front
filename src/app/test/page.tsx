@@ -260,7 +260,7 @@ function TestContent() {
                         }}
                         className="w-full py-4 bg-[#0093D0] hover:bg-[#007bb5] text-white rounded-2xl font-bold text-xl shadow-md transition-transform active:scale-95"
                     >
-                        トップへ もどる
+                        ホームへ もどる
                     </button>
                 </div>
             </main>
