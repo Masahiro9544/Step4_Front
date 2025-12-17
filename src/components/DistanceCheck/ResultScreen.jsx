@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 
-export default function ResultScreen({ distance, onRetry, onSave }) {
+import api from '@/utils/axios';
+
+export default function ResultScreen({ distance, onRetry, onSave, childId }) {
     const [saving, setSaving] = useState(false);
 
     let status = 'normal';
@@ -26,25 +28,26 @@ export default function ResultScreen({ distance, onRetry, onSave }) {
     }
 
     const handleSave = async () => {
+        if (!childId) {
+            alert('子供が選択されていません。ホーム画面に戻って選択してください。');
+            return;
+        }
         setSaving(true);
         try {
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/distance-check`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    child_id: 1,
+                    child_id: childId,
                     distance_cm: distance,
                     alert_flag: distance < 20
                 })
+
             });
 
-            if (!response.ok) {
-                throw new Error('Save failed');
-            }
-
-            await response.json();
             onSave();
         } catch (error) {
             console.error(error);
