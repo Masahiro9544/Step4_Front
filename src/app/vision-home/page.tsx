@@ -70,8 +70,8 @@ export default function Home() {
         </div>
 
         <div className="w-full">
-          <Link href="/dashboard" onClick={() => playSound('/sounds/bottan.mp3')} className="block w-full py-3 bg-white text-[#0093D0] border-2 border-[#0093D0] rounded-2xl font-bold hover:bg-gray-50 transition-colors">
-            きろくをみる (Dashboard)
+          <Link href="/dashboard" onClick={() => playSound('/sounds/bottan.mp3')} className="block w-full py-3 bg-white text-xl text-[#0093D0] border-2 border-[#0093D0] rounded-2xl font-bold hover:bg-gray-50 transition-colors">
+            きろくをみる
           </Link>
         </div>
 
