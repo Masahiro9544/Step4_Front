@@ -16,6 +16,7 @@ export default function ScreenTimePage() {
     const [isPaused, setIsPaused] = useState(false); // 一時停止状態
     const [pausedElapsedSeconds, setPausedElapsedSeconds] = useState<number>(0); // 停止時の経過秒数
     const [startTime, setStartTime] = useState<number | null>(null); // 開始時刻（タイムスタンプ）
+    const [dailyTotal, setDailyTotal] = useState<number>(0); // 今日の合計スマホ時間（秒）
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const syncRef = useRef<NodeJS.Timeout | null>(null);
     const isPausedRef = useRef(false); // isPausedの最新値を保持
@@ -28,6 +29,34 @@ export default function ScreenTimePage() {
 
     const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000'}/api/v1`;
     const SETTINGS_API = `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000'}/api`;
+
+    // 今日の合計スマホ時間を取得（dashboardのrecent_screentimeから計算）
+    const fetchDailyTotal = async (cId: number) => {
+        try {
+            const res = await fetch(`${API_BASE}/dashboard/child/${cId}`, { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                const recentScreentime = data.recent_screentime || [];
+
+                // 今日の日付を取得（YYYY-MM-DD形式）
+                const today = new Date().toISOString().split('T')[0];
+
+                // 今日のscreentimeレコード（end_timeがnullでないもの）の合計を計算
+                const todayTotal = recentScreentime
+                    .filter((record: any) => {
+                        if (!record.end_time) return false;
+                        const recordDate = new Date(record.end_time).toISOString().split('T')[0];
+                        return recordDate === today;
+                    })
+                    .reduce((sum: number, record: any) => sum + (record.total_minutes || 0), 0);
+
+                // 分を秒に変換して保存
+                setDailyTotal(todayTotal * 60);
+            }
+        } catch (e) {
+            console.error('Failed to fetch daily total:', e);
+        }
+    };
 
     // 1. Initialize: Get Child ID & Status
     useEffect(() => {
@@ -44,6 +73,8 @@ export default function ScreenTimePage() {
 
                 // Fetch initial status
                 await fetchStatus(currentChildId);
+                // Fetch daily total
+                await fetchDailyTotal(currentChildId);
             } catch (e) {
                 console.error(e);
             } finally {
@@ -285,6 +316,8 @@ export default function ScreenTimePage() {
                     message: initialMessage,
                     alert_level: 0
                 });
+                // 今日の合計を更新
+                await fetchDailyTotal(childId);
             }
         } catch (e) {
             console.error(e);
@@ -336,7 +369,7 @@ export default function ScreenTimePage() {
                 {/* Info */}
                 {!status?.is_active && !isPaused && (
                     <div className="p-4 sm:p-5 md:p-6 rounded-2xl text-center font-bold text-base sm:text-lg md:text-xl" style={{ backgroundColor: '#E6F7FF', color: '#00A0E9' }}>
-                        📊 きょうは まだ つかってないよ
+                        📊 きょうのスマホじかん {Math.floor(dailyTotal / 60)}分
                     </div>
                 )}
 
