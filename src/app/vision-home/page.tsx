@@ -29,7 +29,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#E0F2F7] p-4 font-sans relative">
-      <div className="absolute top-4 left-4">
+      <div className="absolute top-4 left-4 z-10">
         <Link href="/home" className="flex items-center font-bold text-gray-600 hover:text-gray-800 transition-colors">
           <span className="text-xl sm:text-2xl mr-1 sm:mr-2">←</span>
           <span className="text-base sm:text-lg">もどる</span>
@@ -43,7 +43,7 @@ export default function Home() {
         </div>
       )}
 
-      <div className="max-w-md w-full text-center space-y-8">
+      <div className="max-w-md w-full text-center space-y-8 pt-16 sm:pt-0">
         <h1 className="text-3xl sm:text-5xl font-bold text-[#0093D0] tracking-wider drop-shadow-sm">
           視力チェック
         </h1>
