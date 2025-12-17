@@ -22,20 +22,24 @@ export default function ResultSummary({ results }: ResultSummaryProps) {
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                 <div className="flex divide-x divide-gray-100">
                     <div className="flex-1 text-center px-2">
-                        <div className="text-xs text-gray-400 mb-1">しりょく</div>
+                        <div className="text-xs text-gray-400 mb-1">
+                            <div>しりょく</div>
+                            <div>（みぎ/ひだり）</div>
+                        </div>
                         <div className="space-y-0.5">
                             <p className="text-2xl font-bold text-merelax-primary">
-                                <span className="text-xs text-gray-400 font-normal mr-1">みぎ</span>
                                 {formatVision(results.right_eye)}
                             </p>
                             <p className="text-2xl font-bold text-merelax-primary">
-                                <span className="text-xs text-gray-400 font-normal mr-1">ひだり</span>
                                 {formatVision(results.left_eye)}
                             </p>
                         </div>
                     </div>
                     <div className="flex-1 text-center px-2">
-                        <div className="text-xs text-gray-400 mb-1">スマホきょり</div>
+                        <div className="text-xs text-gray-400 mb-1">
+                            <div>スマホとの</div>
+                            <div>きょり</div>
+                        </div>
                         <p className="text-2xl font-bold text-merelax-distance">
                             {results.avg_distance_cm ? `${Math.round(results.avg_distance_cm)}cm` : '-'}
                         </p>
