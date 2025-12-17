@@ -7,11 +7,15 @@ interface ResultSummaryProps {
 
 export default function ResultSummary({ results }: ResultSummaryProps) {
     // 視力データをフォーマットする関数
-    const formatVision = (vision: string | null | undefined): string => {
+    const formatVision = (vision: string | null | undefined): React.ReactNode => {
         if (!vision) return '-';
         const visionValue = parseFloat(vision);
         if (visionValue <= 0.1) {
-            return '0.5みまん';
+            return (
+                <>
+                    0.5<span className="text-base">みまん</span>
+                </>
+            );
         }
         return vision;
     };
