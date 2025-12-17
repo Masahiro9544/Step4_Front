@@ -53,7 +53,7 @@ export default function DistanceCheckPage() {
                     <span className="text-2xl mr-2">←</span>
                     <span className="text-lg">もどる</span>
                 </Link>
-                <h1 className="flex-1 text-center text-3xl font-bold pr-20 leading-tight" style={{ color: '#00A0E9' }}>
+                <h1 className="flex-1 text-center text-xl md:text-3xl font-bold pr-20 leading-tight" style={{ color: '#00A0E9' }}>
                     📏 スマホ画面距離チェッカー
                 </h1>
             </header>
