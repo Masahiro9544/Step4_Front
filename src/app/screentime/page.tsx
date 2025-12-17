@@ -20,14 +20,15 @@ export default function ScreenTimePage() {
     const syncRef = useRef<NodeJS.Timeout | null>(null);
     const isPausedRef = useRef(false); // isPausedの最新値を保持
 
-    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api`;
+    const API_BASE = `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000'}/api/v1`;
+    const SETTINGS_API = `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000'}/api`;
 
     // 1. Initialize: Get Child ID & Status
     useEffect(() => {
         async function init() {
             try {
                 // Fetch Child ID from settings
-                const settingsRes = await fetch(`${API_BASE}/settings/1`);
+                const settingsRes = await fetch(`${SETTINGS_API}/settings/1`);
                 let currentChildId = 1;
                 if (settingsRes.ok) {
                     const settings = await settingsRes.json();
