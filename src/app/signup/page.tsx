@@ -23,6 +23,11 @@ export default function SignupPage() {
         e.preventDefault();
         setError('');
 
+        if (password.length < 6) {
+            setError('パスワードは6文字以上で入力してください');
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError('パスワードが一致しません');
             return;
@@ -103,6 +108,7 @@ export default function SignupPage() {
                                 name="password"
                                 type="password"
                                 required
+                                minLength={6}
                                 className="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all text-lg"
                                 style={{ borderColor: '#E0E0E0' }}
                                 placeholder="••••••••"
@@ -124,6 +130,7 @@ export default function SignupPage() {
                                 name="confirm-password"
                                 type="password"
                                 required
+                                minLength={6}
                                 className="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all text-lg"
                                 style={{ borderColor: '#E0E0E0' }}
                                 placeholder="••••••••"
