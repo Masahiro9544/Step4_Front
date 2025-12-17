@@ -15,7 +15,7 @@ export default function ControlButtons({ isActive, isPaused, onStart, onPause, o
     if (isActive) {
         // タイマー動作中 → 「ストップ」「リセット」ボタン
         return (
-            <div className="flex gap-2 sm:gap-3 md:gap-4 w-full max-w-sm px-3 sm:px-4">
+            <div className="flex gap-2 sm:gap-3 md:gap-4 w-full max-w-sm md:max-w-md px-3 sm:px-4">
                 <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={onPause}
@@ -61,7 +61,7 @@ export default function ControlButtons({ isActive, isPaused, onStart, onPause, o
                     <span className="text-4xl sm:text-5xl">▶</span>
                     <span>スタート</span>
                 </motion.button>
-                <div className="flex gap-2 sm:gap-3 md:gap-4 w-full">
+                <div className="flex gap-2 sm:gap-3 md:gap-4 w-full max-w-sm md:max-w-md">
                     <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={onReset}
