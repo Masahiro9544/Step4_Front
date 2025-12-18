@@ -267,6 +267,10 @@ export default function HomePage() {
                             <ResultSummary results={homeData.last_results} />
                         </motion.div>
                     )}
+                    {/* Credit */}
+                    <div className="text-center mt-8 mb-4 text-[10px] text-gray-400 font-medium">
+                        VOICEBOX：ずんだもん
+                    </div>
                 </main>
 
                 {/* 下部ナビゲーションバー - かわいく改良 */}
